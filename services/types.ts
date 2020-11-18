@@ -1,6 +1,22 @@
-export interface Profile{
-    
+export class Profile{
+    name:String;
+    profilePic_url:Object;
 }
+export class SpotifyProfile extends Profile{
+    constructor(profile:any){
+        super();
+        this.name = profile['display_name'];
+        this.profilePic_url = profile['images'][0].url;
+    }
+}
+export class YoutubeProfile extends Profile{
+    constructor(profile:any){
+        super();
+        this.name = profile.items[0].snippet.title;
+        this.profilePic_url = profile.items[0].snippet.thumbnails.default.url
+    }
+}
+
 export enum AuthType {
     spotify = "spotify",
     youtube = "youtube",

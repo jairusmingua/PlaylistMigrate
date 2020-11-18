@@ -1,17 +1,13 @@
 
 import { google, GoogleApis } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library';
-import {Credentials,AuthType,OAuthType} from '../types';
-export class YoutubeOAuth {
-    private credentials: Credentials;
+import {Credentials,AuthType,OAuthType, YoutubeProfile} from './types';
+import Service from './Service';
+export class Youtube extends Service{
     private ouath2client:OAuth2Client;
-    constructor(credentials:Credentials) 
+    constructor(credentials:Credentials,token_uri:string) 
     {
-        this.credentials = {
-            client_id:credentials.client_id,
-            client_secret: credentials.client_secret,
-            redirect_uri: credentials.redirect_uri,
-        }
+        super(credentials,token_uri);
         this.ouath2client = new google.auth.OAuth2(
             credentials.client_id,
             credentials.client_secret,
@@ -21,7 +17,8 @@ export class YoutubeOAuth {
     generateUrl() {
         google.youtube
         const scopes: Array<string> = [
-            'https://www.googleapis.com/auth/youtube'
+            'https://www.googleapis.com/auth/youtube',
+            'https://www.googleapis.com/auth/youtube.readonly'
 
         ]
         const url = this.ouath2client.generateAuthUrl({
@@ -46,5 +43,23 @@ export class YoutubeOAuth {
     }
     async refreshToken(refreshToken: string) {
         return null;
+    }
+    async getPlaylists(token:string){
+        return null;   
+    }
+    async getUserProfile(token:string){
+        const youtube = google.youtube('v3');
+        
+        const result = await youtube.channels.list(
+            {
+                oauth_token:token,
+                part:[
+                    "snippet,contentDetails,statistics"
+                ],
+                mine:true
+            }
+        )
+        const profile = new YoutubeProfile(result.data);
+        return profile;
     }
 }

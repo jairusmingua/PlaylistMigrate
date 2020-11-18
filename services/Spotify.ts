@@ -1,16 +1,6 @@
-import {Credentials,AuthType,OAuthType, TokenType} from '../types';
-export class SpotifyOAuth {
-    private credentials: Credentials;
-    private token_uri:string;
-    constructor(credentials:Credentials,token_uri:string) 
-    {
-        this.credentials = {
-            client_id:credentials.client_id,
-            client_secret: credentials.client_secret,
-            redirect_uri: credentials.redirect_uri,
-        }
-        this.token_uri = token_uri;
-    }
+import {Credentials,AuthType,OAuthType, TokenType,SpotifyProfile} from './types';
+import Service from './Service';
+export class Spotify extends Service {
     async getToken(auth_code: string) {
         const url = this.token_uri +
             `?grant_type=authorization_code&code=${auth_code}&redirect_uri=${encodeURIComponent(this.credentials.redirect_uri)}`
@@ -67,5 +57,22 @@ export class SpotifyOAuth {
         };
         const spotify_token_encoded = encodeURIComponent(JSON.stringify(spotify_token_modified));
         return spotify_token_encoded;
+    }
+    async getPlaylists(token:string){
+       return null;
+    }
+    async getUserProfile(token:string):Promise<SpotifyProfile>{
+        const url = 'https://api.spotify.com/v1/me';
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            }
+        });
+        const data = await response.json()
+        const profile = new SpotifyProfile(data);
+        return profile;
+      
     }
 }

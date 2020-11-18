@@ -4,6 +4,8 @@ import { Row, Col, Container, Navbar,Button } from 'react-bootstrap';
 import {AuthType,OAuthType} from '../services/types';
 import {NextRouter, useRouter} from 'next/router';
 import { storeToken } from './_app';
+import SpotifyTray from '../components/SpotifyTray';
+import YoutubeTray from '../components/YoutubeTray';
 export default function Home() {
   const router:NextRouter = useRouter();
   if(router.query["token"]){
@@ -27,11 +29,17 @@ export default function Home() {
               Login to Spotify
               <Link href={`/api/login?${AuthType.queryString}=${AuthType.spotify}`}>Login</Link>
             </Row>
+            <Row>
+              <SpotifyTray></SpotifyTray>
+            </Row>
           </Col>
           <Col>
             <Row>
               Login to Youtube
               <Link href={`/api/login?${AuthType.queryString}=${AuthType.youtube}`}>Login</Link>
+            </Row>
+            <Row>
+              <YoutubeTray></YoutubeTray>
             </Row>
           </Col>
          
