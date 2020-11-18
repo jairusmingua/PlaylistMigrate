@@ -1,8 +1,9 @@
 import Head from 'next/head'
 import Link from 'next/link';
 import { Row, Col, Container, Navbar,Button } from 'react-bootstrap';
-import {AuthType,OAuthType} from '../services/authTypes';
+import {AuthType,OAuthType} from '../services/types';
 import {NextRouter, useRouter} from 'next/router';
+import { storeToken } from './_app';
 export default function Home() {
   const router:NextRouter = useRouter();
   if(router.query["token"]){
@@ -10,15 +11,6 @@ export default function Home() {
     const token:OAuthType = JSON.parse(decoded_token);
     storeToken(token);
     router.push("/")
-  }
-  function storeToken(token:OAuthType){
-    window.localStorage.setItem(`${token.auth_type}_access_token`,token.access_token.toString());
-    if(token.refresh_token){
-      window.localStorage.setItem(`${token.auth_type}_refresh_token`,token.refresh_token.toString());
-    }
-    window.localStorage.setItem(`${token.auth_type}_token_type`,token.token_type.toString());
-    window.localStorage.setItem(`${token.auth_type}_scope`,token.scope.toString());
-    window.localStorage.setItem(`${token.auth_type}_expires_in`,token.expires_in.toString());
   }
   return (
     <div>
