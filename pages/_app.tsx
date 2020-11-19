@@ -17,3 +17,10 @@ export function storeToken(token:OAuthType){
   window.localStorage.setItem(`${token.auth_type}_expires_in`,token.expires_in.toString());
 }
 
+export function clearToken(app_type:string){
+  window.localStorage.removeItem(`${app_type}_access_token`);
+  window.localStorage.removeItem(`${app_type}_refresh_token`);
+  window.localStorage.removeItem(`${app_type}_token_type`);
+  window.localStorage.removeItem(`${app_type}_scope`);
+  window.localStorage.removeItem(`${app_type}_expires_in`);
+}

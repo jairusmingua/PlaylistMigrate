@@ -1,7 +1,7 @@
 
 import { google, GoogleApis } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library';
-import {Credentials,AuthType,OAuthType, YoutubeProfile} from './types';
+import {Credentials,AuthType,OAuthType, YoutubeProfile, YoutubePlaylist} from './types';
 import Service from './Service';
 export class Youtube extends Service{
     private ouath2client:OAuth2Client;
@@ -42,24 +42,48 @@ export class Youtube extends Service{
         return youtube_token_encoded;
     }
     async refreshToken(refreshToken: string) {
+
         return null;
     }
     async getPlaylists(token:string){
-        return null;   
+        try {
+            const youtube = google.youtube('v3');
+            const result = await youtube.playlists.list(
+                {
+                    oauth_token:token,
+                    part:[
+                        "snippet,contentDetails"
+                    ],
+                    mine:true,
+                    maxResults:50 //temporary
+                }
+            )
+            const playlists = Array.from(result.data.items).map((playlist)=>{
+                return new YoutubePlaylist(playlist);
+            });
+            return playlists;
+        } catch (error) {
+            throw error;
+        }
     }
     async getUserProfile(token:string){
-        const youtube = google.youtube('v3');
-        
-        const result = await youtube.channels.list(
-            {
-                oauth_token:token,
-                part:[
-                    "snippet,contentDetails,statistics"
-                ],
-                mine:true
-            }
-        )
-        const profile = new YoutubeProfile(result.data);
-        return profile;
+        try {
+            const youtube = google.youtube('v3');
+            
+            const result = await youtube.channels.list(
+                {
+                    oauth_token:token,
+                    part:[
+                        "snippet,contentDetails,statistics"
+                    ],
+                    mine:true
+                }
+            )
+            const profile = new YoutubeProfile(result.data);
+            return profile;
+            
+        } catch (error) {
+            throw error;
+        }
     }
 }

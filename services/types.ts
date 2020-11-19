@@ -16,7 +16,27 @@ export class YoutubeProfile extends Profile{
         this.profilePic_url = profile.items[0].snippet.thumbnails.default.url
     }
 }
-
+export class Playlist{
+    name:string;
+    id:string;
+    images:Object;
+}
+export class SpotifyPlaylist extends Playlist{
+    constructor(playlist:any){
+        super();
+        this.name = playlist.name;
+        this.id = playlist.id;
+        this.images = playlist.images[0].url;
+    }
+}
+export class YoutubePlaylist extends Playlist{
+    constructor(playlist:any){
+        super();
+        this.name = playlist.snippet.title;
+        this.id = playlist.id;
+        this.images = playlist.snippet.thumbnails.medium.url;
+    }
+}
 export enum AuthType {
     spotify = "spotify",
     youtube = "youtube",

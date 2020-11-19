@@ -1,4 +1,4 @@
-import {Credentials,AuthType,OAuthType, TokenType,SpotifyProfile} from './types';
+import {Credentials,AuthType,OAuthType, TokenType,SpotifyProfile, SpotifyPlaylist} from './types';
 import Service from './Service';
 export class Spotify extends Service {
     async getToken(auth_code: string) {
@@ -58,21 +58,43 @@ export class Spotify extends Service {
         const spotify_token_encoded = encodeURIComponent(JSON.stringify(spotify_token_modified));
         return spotify_token_encoded;
     }
-    async getPlaylists(token:string){
-       return null;
+    async getPlaylists(token:string):Promise<Array<SpotifyPlaylist>>{
+        try {
+            const url = "https://api.spotify.com/v1/me/playlists";
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                }
+            });
+            const data = await response.json();
+            const playlists = Array.from(data.items).map((playlist)=>{
+                return new SpotifyPlaylist(playlist);
+            });
+            return playlists;
+            
+        } catch (error) {
+            throw error;
+        }
     }
     async getUserProfile(token:string):Promise<SpotifyProfile>{
-        const url = 'https://api.spotify.com/v1/me';
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Accept": "application/json",
-            }
-        });
-        const data = await response.json()
-        const profile = new SpotifyProfile(data);
-        return profile;
+        try {
+            const url = 'https://api.spotify.com/v1/me';
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                }
+            });
+            const data = await response.json()
+            const profile = new SpotifyProfile(data);
+            return profile;
+            
+        } catch (error) {
+            throw error
+        }
       
     }
 }

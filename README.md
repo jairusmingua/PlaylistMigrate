@@ -4,5 +4,5 @@
 - ✅ Authentication
 - ✅ View User Profile
 - ⌛ Ui Design
-- ❌ View Playlists
+- ✅ View Playlists
 - ❌ View Playlist Songs

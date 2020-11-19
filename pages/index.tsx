@@ -4,7 +4,7 @@ import { Row, Col, Container, Navbar, Button } from 'react-bootstrap';
 import { AuthType, OAuthType } from '../services/types';
 import { NextRouter, useRouter } from 'next/router';
 import { storeToken } from './_app';
-import SpotifyTray from '../components/SpotifyTray';
+import Tray from '../components/Tray';
 import YoutubeTray from '../components/YoutubeTray';
 export default function Home() {
   const router: NextRouter = useRouter();
@@ -33,16 +33,16 @@ export default function Home() {
             PlaylistMigrate
           </Navbar.Brand>
         </Navbar>
-        <Row style={{ height: "90%", width: "100%", maxWidth: "100%", margin: 0 }}>
+        <Container style={{ height: "90%", width: "100%", maxWidth: "100%", margin: 0 }}>
 
-          <Col xs={12} sm={12} md={12} lg={6} className="p-2">
-            <SpotifyTray />
+          <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray">
+            <Tray trayType="spotify"></Tray>
           </Col>
-          <Button className="d-lg-none d-xl-none d-xs-block d-sm-block d-md-block position-fixed align-self-center migrate-btn">Migrate</Button>
-          <Col xs={12} sm={12} md={12} lg={6} className="p-2">
-            <YoutubeTray />
+          {/* <Button className="d-lg-none d-xl-none d-xs-block d-sm-block d-md-block position-fixed align-self-center migrate-btn">Migrate</Button> */}
+          <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray">
+            <Tray trayType="youtube"></Tray>
           </Col>
-        </Row>
+        </Container>
       </Container>
     </>
   )
