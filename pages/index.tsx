@@ -5,7 +5,6 @@ import { AuthType, OAuthType } from '../services/types';
 import { NextRouter, useRouter } from 'next/router';
 import { storeToken } from './_app';
 import Tray from '../components/Tray';
-import YoutubeTray from '../components/YoutubeTray';
 export default function Home() {
   const router: NextRouter = useRouter();
   if (router.query["token"]) {
