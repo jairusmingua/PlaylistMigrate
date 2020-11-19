@@ -3,7 +3,7 @@ import {Youtube} from './Youtube';
 import {Spotify} from './Spotify';
 import os from 'os';
 const development = 'http://localhost:3000/api/tokenize';
-const production = `https://${process.env.VERCEL_URL}/api/tokenize`
+const production = `https://playlist-migrate.vercel.app/api/tokenize`
 console.log(process.env.NODE_ENV)
 export const YoutubeService = new Youtube(
     {
