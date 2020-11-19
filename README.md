@@ -3,5 +3,6 @@
 ## Tasks
 - ✅ Authentication
 - ✅ View User Profile
+- ⌛ Ui Design
 - ❌ View Playlists
 - ❌ View Playlist Songs

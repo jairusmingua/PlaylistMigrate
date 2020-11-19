@@ -1,5 +1,5 @@
 export class Profile{
-    name:String;
+    name:string;
     profilePic_url:Object;
 }
 export class SpotifyProfile extends Profile{

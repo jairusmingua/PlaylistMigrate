@@ -19,4 +19,31 @@ a {
 
 .container{
   background-color: rgb(33, 33, 33) !important;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100%;
+  
+}
+
+.profile-pic{
+  margin-left: 10px;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+.tray{
+  background-color:#707070 !important;
+  border-radius: 20px;
+  padding: 20px;
+}
+.migrate-btn{
+  left: 50%;
+  margin-left: -25vw;
+  z-index: 100;
+}
+.btn-primary{
+  background-color: #1ED760 !important;
+  border-color: transparent !important;
+  border-radius: 50px !important;
+  width: 50vw;
+  box-shadow: 5px 10px 20px #0606067e; ;
 }
