@@ -7,11 +7,11 @@ type AppProps ={playlist:Playlist};
 export default function PlaylistItem({playlist}:AppProps) {
  
     return (
-        <Row className="playlist-item m-0">
+        <Row className="playlist-item mx-0 my-1 p-2">
             <Col xs={2}>
                 <img height={50} width={50} src={playlist.images.toString()} className="rounded"></img>
             </Col>
-            <Col xs={10}>
+            <Col >
                 <h4>{playlist.name}</h4>
             </Col>
 
