@@ -32,15 +32,16 @@ export default function Home() {
             PlaylistMigrate
           </Navbar.Brand>
         </Navbar>
-        <Container style={{ height: "90%", width: "100%", maxWidth: "100%", margin: 0 }}>
+        <Container style={{ height: "80%", width: "100%", maxWidth: "100%" }}>
 
-          <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray">
+          {/* <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray"> */}
             <Tray trayType="spotify"></Tray>
-          </Col>
+          {/* </Col> */}
+          {/* <br></br> */}
           {/* <Button className="d-lg-none d-xl-none d-xs-block d-sm-block d-md-block position-fixed align-self-center migrate-btn">Migrate</Button> */}
-          <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray">
+          {/* <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray"> */}
             <Tray trayType="youtube"></Tray>
-          </Col>
+      
         </Container>
       </Container>
     </>
