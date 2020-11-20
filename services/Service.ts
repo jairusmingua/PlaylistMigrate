@@ -2,11 +2,11 @@ import { Credentials, Profile } from "./types";
 export default abstract class Service{
     credentials: Credentials;
     token_uri:string;
-    abstract async getToken(auth_code:string);
+    abstract getToken(auth_code:string);
     abstract generateUrl();
-    abstract async refreshToken(refreshToken:string);
-    abstract async getPlaylists(token:string);
-    abstract async getUserProfile(token:string):Promise<Profile>;
+    abstract refreshToken(refreshToken:string);
+    abstract getPlaylists(token:string);
+    abstract getUserProfile(token:string):Promise<Profile>;
     constructor(credentials:Credentials,token_uri:string) 
     {
         this.credentials = {
