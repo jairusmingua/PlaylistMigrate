@@ -4,7 +4,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  background-color: rgb(33, 33, 33) !important;
+  background-color: #131A13 !important;
   color: white !important;
 }
 
@@ -17,40 +17,46 @@ a {
   box-sizing: border-box;
 }
 
-.container{
-  background-color: rgb(33, 33, 33) !important;
-  height: 100vh;
-  width: 100vw;
-  max-width: 100%;
-  
+.btn {
+  width: 100% !important;
+  border-radius: 30px !important;
+
 }
 
-.profile-pic{
-  margin-left: 10px;
-  height: 1.5rem;
-  width: 1.5rem;
+.btn-dark {
+  background-color: #0A0000 !important;
 }
-.tray{
-  background-color:#707070 !important;
-  border-radius: 20px;
-  /* padding: 20px; */
+
+img.dark {
+  filter: invert(100%);
 }
-.migrate-btn{
+
+h1.dark {
+  color: black;
+}
+
+.card {
+  border-radius: 20px !important;
+}
+
+nav {
+  height: 20vh !important;
+  padding: 0 10vw 0 10vw !important;
+  background-color: 0 !important;
+}
+
+nav a {
+  font-size: 24pt !important;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
   left: 50%;
-  margin-left: -25vw;
-  z-index: 100;
 }
-.btn-primary{
-  background-color: #1ED760 !important;
-  border-color: transparent !important;
-  border-radius: 50px !important;
-  width: 50vw;
-  box-shadow: 5px 10px 20px #0606067e; ;
-}
-.playlist-list{
-  overflow-y: scroll;
-}
-.playlist-item{
-  background-color: rgb(33, 33, 33) !important;
-  border-radius: 10px;
+
+
+.profilePic {
+  height: 60px;
+  width: 60px;
 }
