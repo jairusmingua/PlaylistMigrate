@@ -17,23 +17,46 @@ a {
   box-sizing: border-box;
 }
 
-.btn{
+.btn {
   width: 100% !important;
   border-radius: 30px !important;
 
 }
-.btn-dark{
+
+.btn-dark {
   background-color: #0A0000 !important;
 }
 
-img.dark{
+img.dark {
   filter: invert(100%);
 }
 
-h1.dark{
-  color:black;
+h1.dark {
+  color: black;
 }
 
-.card{
+.card {
   border-radius: 20px !important;
+}
+
+nav {
+  height: 20vh !important;
+  padding: 0 10vw 0 10vw !important;
+  background-color: 0 !important;
+}
+
+nav a {
+  font-size: 24pt !important;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+
+.profilePic {
+  height: 60px;
+  width: 60px;
 }

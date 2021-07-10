@@ -8,39 +8,38 @@ import { PrismaClient } from "@prisma/client"
 import { GetServerSideProps } from "next";
 import { IncomingMessage, ServerResponse } from 'http'
 import prisma from '../../db/prisma'
-
-type User = {
-  id: string;
-  name: string;
-  image: string;
-};
+import { User } from '.prisma/client'
+import { Navbar, Image, Container, Col, Row, Spinner } from 'react-bootstrap'
+import PageNavigation from '../../components/PageNavigation'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  
+
   const session = await getSession({ req });
+
   if (!session) {
-    res.writeHead(302,{
-      Location: "/dashboard",
-    });
+    res.statusCode = 302
+    res.setHeader('Location', `/login`)
+    return { props: {} }
   }
-  const user = await prisma.user.findUnique({
-    where:{
+  const user: User = await prisma.user.findUnique({
+    where: {
       email: session.user.email,
     }
   })
-  return {props:{user:user}}
-   
+
+  return { props: { user: user } }
+
 };
 
-export default function Dashboard({props}) {
-  const user : User = props.user
+export default function Dashboard({ user }: { user: User }) {
+
   return (
     <>
-          <div>
-            Hello {user.name}
-          </div>
-          <img src={user.image}/>
-          <button onClick={()=>signOut({callbackUrl:"/login"})}>SignOut</button>
+      <PageNavigation user={user}></PageNavigation>
+      <div className="d-flex justify-content-center loading">
+        <Spinner animation="border" role="status">
+        </Spinner>
+      </div>
     </>
   )
 }
