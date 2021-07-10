@@ -105,9 +105,7 @@ export default function Tray({ trayType }: AppProps) {
             :
             <Row className="h-50 tray w-100 mt-1 m-0 p-0">
                 <div className="align-self-center position-fixed" style={{left:"50%",transform:"translate(-50%,0%)"}}>
-
                     <Link href={`/api/login?${AuthType.queryString}=${trayType}`}><Button>{`Login to ${trayType == "spotify" ? 'Spotify' : 'Youtube'}`}</Button></Link>
-
                 </div>
             </Row>
         }

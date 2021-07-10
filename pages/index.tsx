@@ -1,49 +1,25 @@
-import Head from 'next/head'
-import Link from 'next/link';
-import { Row, Col, Container, Navbar, Button } from 'react-bootstrap';
-import { AuthType, OAuthType } from '../services/types';
-import { NextRouter, useRouter } from 'next/router';
-import { storeToken } from './_app';
-import Tray from '../components/Tray';
-export default function Home() {
-  const router: NextRouter = useRouter();
-  if (router.query["token"]) {
-    const decoded_token = decodeURIComponent(router.query["token"].toString());
-    const token: OAuthType = JSON.parse(decoded_token);
-    storeToken(token);
-    router.push("/")
-  }
-  return (
-    <>
-      <Head>
-        <title>PlaylistMigrate</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Container className="p-2">
-        <Navbar variant="dark" style={{ height: "auto" }} >
-          <Navbar.Brand>
-            <img
-              src="logo.svg"
-              width="40"
-              height="40"
-              className="d-inline-block pr-2 align-top"
-              alt="React Bootstrap logo"
-            />
-            PlaylistMigrate
-          </Navbar.Brand>
-        </Navbar>
-        <Container style={{ height: "80%", width: "100%", maxWidth: "100%" }}>
+import { signOut, useSession, getSession } from 'next-auth/client'
+import { NextApiRequest, NextApiResponse } from 'next'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { AppProps } from 'next/app';
+import { PrismaClient } from "@prisma/client"
+import { GetServerSideProps } from "next";
+import { IncomingMessage, ServerResponse } from 'http'
+import prisma from '../db/prisma'
 
-          {/* <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray"> */}
-            <Tray trayType="spotify"></Tray>
-          {/* </Col> */}
-          {/* <br></br> */}
-          {/* <Button className="d-lg-none d-xl-none d-xs-block d-sm-block d-md-block position-fixed align-self-center migrate-btn">Migrate</Button> */}
-          {/* <Col xs={12} sm={12} md={12} lg={6} className="p-2 tray"> */}
-            <Tray trayType="youtube"></Tray>
-      
-        </Container>
-      </Container>
-    </>
-  )
+function Home({ props }) {
+  return (
+
+
+    <div>
+      <Link href="/dashboard">Dashboard</Link>
+    </div>
+  
+
+      )
+   
 }
+
+export default Home
