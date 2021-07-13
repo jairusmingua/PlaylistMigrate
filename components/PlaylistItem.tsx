@@ -1,20 +1,26 @@
-import { Row, Col, Container, Media } from 'react-bootstrap';
-import { AuthType, OAuthType, Playlist, Profile, SpotifyProfile } from '../services/types';
+import { Row, Col, Container, Media, Card } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-// import { AppProps } from 'next/dist/next-server/lib/router/router';
-type AppProps ={playlist:Playlist};
-export default function PlaylistItem({playlist}:AppProps) {
- 
-    return (
-        <Row className="playlist-item mx-0 my-1 p-2">
-            <Col xs={2}>
-                <img height={50} width={50} src={playlist.images.toString()} className="rounded"></img>
-            </Col>
-            <Col >
-                <h4>{playlist.name}</h4>
-            </Col>
+import { Playlist } from '@prisma/client';
 
-        </Row>
+export default function PlaylistItem({ item }: {item:Playlist}) {
+
+    return (
+        <div className="m-2" style={{backgroundColor:"black",borderRadius:"20px",padding:"5px" }}>
+
+        <div className="d-flex flex-column m-3" style={{ width: "150px"}}>
+            <img src={item.image} key={item.id} height="150vw" width="150vw" style={{ borderRadius: "20px" }} />
+            <div className="d-flex flex-column">
+                <b>{item.title}</b>
+                {/* <span>{item.description}</span> */}
+            </div>
+        </div>
+        </div>
+        // <Card style={{width:"20vw"}}>
+        //     <Card.Img src={item.image}/>
+        //     <Card.Body>
+        //         <Card.Title>{item.title}</Card.Title>
+        //     </Card.Body>
+        // </Card>
     )
 }

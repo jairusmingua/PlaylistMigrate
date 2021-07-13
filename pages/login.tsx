@@ -4,7 +4,20 @@ import { useRouter } from 'next/router';
 import {Session} from 'next-auth'
 import { getSession, providers, signIn, signOut, useSession } from 'next-auth/client'
 import { useEffect } from 'react';
-export default function Login({providers, csrfToken}) {
+import { GetServerSideProps } from "next";
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+
+    const session = await getSession({ req });
+    if (session) {
+      res.statusCode = 302
+      res.setHeader('Location', `/dashboard`)
+      return { props: {} }
+    }
+
+    return { props: { } }
+  
+};
+export default function Login({props}) {
     return <>
         <Container className="d-flex mt-5 justify-content-center">
             <Card className="text-center p-4">
@@ -51,12 +64,12 @@ Login.getInitialProps = async(context) => {
     const {req, res} = context;
     const session = await getSession({req});
     if(session){
+
         console.log(session)
-        res.writeHead(302,{
-            Location: "/dashboard",
-        });
-        res.end()
-        return;
+        console.log('redirecting')
+        res.statusCode = 302
+        res.setHeader('Location', `/dashboard`)
+        return {providers: await providers}
     }
     return {
         session: undefined,

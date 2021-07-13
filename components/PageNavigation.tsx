@@ -1,4 +1,6 @@
 import { User } from "@prisma/client";
+import { signOut } from "next-auth/client";
+import Link from "next/link";
 import { Navbar, NavDropdown, Nav, Image } from "react-bootstrap";
 
 export default function PageNavigation({ user }: { user: User }) {
@@ -14,7 +16,7 @@ export default function PageNavigation({ user }: { user: User }) {
             PlaylistMigrate
         </Navbar.Brand>
         <Navbar.Collapse className="justify-content-end">
-            <Image src={user.image} fluid roundedCircle className="profilePic"></Image>
+            <Image src={user.image} onClick={()=>signOut()} fluid roundedCircle className="profilePic"></Image>
         </Navbar.Collapse>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         {/* <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">

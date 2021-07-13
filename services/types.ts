@@ -19,14 +19,17 @@ export class YoutubeProfile extends Profile{
 export class Playlist{
     name:string;
     id:string;
-    images:Object;
+    image:string;
+    description:string
 }
 export class SpotifyPlaylist extends Playlist{
     constructor(playlist:any){
         super();
+        console.log(playlist)
         this.name = playlist.name;
         this.id = playlist.id;
-        this.images = playlist.images[0].url;
+        this.image = playlist.images[0];
+        this.description = playlist.description
     }
 }
 export class YoutubePlaylist extends Playlist{
@@ -34,7 +37,7 @@ export class YoutubePlaylist extends Playlist{
         super();
         this.name = playlist.snippet.title;
         this.id = playlist.id;
-        this.images = playlist.snippet.thumbnails.medium.url;
+        this.image = playlist.snippet.thumbnails.medium.url;
     }
 }
 export enum AuthType {

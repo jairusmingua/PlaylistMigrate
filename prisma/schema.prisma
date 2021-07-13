@@ -63,6 +63,7 @@ model VerificationRequest {
 
 model Playlist {
   id           String   @id @default(cuid())
+  external_id  String   @unique
   userId       String
   title        String
   description  String
