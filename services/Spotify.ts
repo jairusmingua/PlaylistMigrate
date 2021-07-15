@@ -1,5 +1,4 @@
 import {Credentials,AuthType,OAuthType, SpotifyPlaylist} from './types';
-import Service from './Service';
 import { Account, Playlist, User } from '@prisma/client';
 import {secondDifference} from '../util'
 import prisma from '../db/prisma';

@@ -1,10 +1,9 @@
 //redirects user to respective auth sites
 import { NextApiRequest, NextApiResponse } from 'next'
-import { SpotifyService, YoutubeService } from '../../../services/PlaylistMigrate';
 import { getSession, GetSessionOptions } from 'next-auth/client';
 import prisma from '../../../db/prisma';
 import spotify from '../../../services/Spotify'
-import { Account, Playlist } from '@prisma/client';
+
 export default async (_: NextApiRequest, res: NextApiResponse) => {
     const prefix = 'api/profile'
     const session = await getSession({ req: _ })
