@@ -1,9 +1,10 @@
 import { Suspense } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, extend } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import { Navbar, Container, Button } from 'react-bootstrap'
 
 import Nav from '../components/Nav';
+extend({ OrbitControls });
 
 function Home({ props }) {
   function Hero() {
@@ -24,7 +25,7 @@ function Home({ props }) {
                   <Suspense fallback={null}>
                     <ambientLight intensity={0.5} />
                     <directionalLight color="white" position={[0, 0, 5]} />
-                    <OrbitControls enableZoom={false}></OrbitControls>
+                    <OrbitControls enableZoom={false} addEventListener={undefined} hasEventListener={undefined} removeEventListener={undefined} dispatchEvent={undefined}></OrbitControls>
                     <Hero />
                   </Suspense>
                 </Canvas>
@@ -96,7 +97,6 @@ function Home({ props }) {
               </div>
             </div>
           </div>
-          {/* <img src="listening.jpg" style={{ background: "linear-gradient(0deg, rgba(0, 0, 0, 0.69), rgba(0, 0, 0, 0.69))", position:"absolute", width:"100vw"}}/> */}
         </div>
       </section>
 
