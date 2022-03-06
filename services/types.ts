@@ -25,7 +25,6 @@ export class Playlist{
 export class SpotifyPlaylist extends Playlist{
     constructor(playlist:any){
         super();
-        console.log(playlist)
         this.name = playlist.name;
         this.id = playlist.id;
         this.image = playlist.images[0];

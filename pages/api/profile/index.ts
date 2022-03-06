@@ -19,13 +19,6 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
             
         })
         const spotifyCredentials = user.accounts.filter(accounts=> accounts.providerId=="spotify")[0]
-        // const playlist = user.playlists
-        // console.log(spotifyCredentials)
-        // console.log(await spotify.getPlaylists(spotifyCredentials))
-        // console.log(`${prefix} ${session}`)
-        // const playlist = await prisma.playlist.upsert({
-        //     update:await spotify.getPlaylists(spotifyCredentials),
-        // })
         const playlist = await spotify.getPlaylists(spotifyCredentials);
         if (playlist.length>user.playlists.length){
             playlist.map((item)=>{

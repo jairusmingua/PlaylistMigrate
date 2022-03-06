@@ -4,6 +4,8 @@ import { OrbitControls, useGLTF } from '@react-three/drei'
 import { Navbar, Container, Button } from 'react-bootstrap'
 
 import Nav from '../components/Nav';
+import { Footer } from '../components/Footer';
+
 extend({ OrbitControls });
 
 function Home({ props }) {
@@ -99,7 +101,7 @@ function Home({ props }) {
           </div>
         </div>
       </section>
-
+      <Footer/>
       <style jsx>{
         `
         .section-1{

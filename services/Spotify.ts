@@ -7,7 +7,6 @@ export class Spotify {
 
     async refreshToken(account: Account): Promise<Account> {
         try {
-            console.log('refresshing tokens')
             const url = `https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=${account.refreshToken}`
             const response = await fetch(url, {
                 method: 'POST',
@@ -40,7 +39,6 @@ export class Spotify {
     }
     async getPlaylists(account: Account):Promise<Array<Playlist>>{
         try {
-            console.log(secondDifference(account.updatedAt))
             if (secondDifference(account.updatedAt)>3600){
                 account = await this.refreshToken(account)   
             }
@@ -59,7 +57,6 @@ export class Spotify {
             const playlist : Array<Playlist> = []
             Array.from(data.items).map((item)=>{
                 let i = new SpotifyPlaylist(item)
-                console.log(i)
                 playlist.push({
                     title:i.name,
                     image:i.image['url'],

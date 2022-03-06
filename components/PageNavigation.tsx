@@ -1,36 +1,43 @@
 import { User } from "@prisma/client";
 import { signOut } from "next-auth/client";
+import Image from 'next/image'
 import Link from "next/link";
-import { Navbar, NavDropdown, Nav, Image } from "react-bootstrap";
-
+import { Navbar, NavDropdown, DropdownButton, Dropdown, Nav, Image as Img } from "react-bootstrap";
+import { useRef } from "react";
 export default function PageNavigation({ user }: { user: User }) {
-    return (<Navbar variant="dark">
-        <Navbar.Brand href="/dashboard">
-            <img
-                alt=""
-                src="/logo.svg"
-                width="50"
-                height="50"
-                className="d-inline-block align-middle"
-            />{' '}
-            PlaylistMigrate
-        </Navbar.Brand>
-        <Navbar.Collapse className="justify-content-end">
-            <Image src={user.image} onClick={()=>signOut()} fluid roundedCircle className="profilePic"></Image>
-        </Navbar.Collapse>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        {/* <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-            <Nav className="me-auto">
-                <Nav.Link href="#home">Home</Nav.Link>
-                <Nav.Link href="#link">Link</Nav.Link>
-                <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                    <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                    <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
-                    <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                </NavDropdown>
-            </Nav>
-        </Navbar.Collapse> */}
-    </Navbar>)
+    const dropDownRef = useRef(0)
+    return (
+        <>
+            <Navbar variant="dark" className="p-0">
+                <Navbar.Brand href="/dashboard" className="justify-content-between align-items-center d-flex p-0 m-0">
+                    <Image
+                        src="/icon.svg"
+                        width={50}
+                        height={50}
+                    />
+                    <span className="p-2">
+                        PlaylistMigrate
+                    </span>
+                </Navbar.Brand>
+                <Navbar.Collapse className="justify-content-end">
+                    <div className="d-flex justify-content-end gap-3 align-items-center">
+
+                        <Img src={user.image} fluid roundedCircle className="profilePic"></Img>
+
+                        <DropdownButton
+                            className="p-2"
+                            title={user.name}
+                            variant="secondary"
+                            id="input-group-dropdown-1"
+                        >
+                            <Dropdown.Item href="#" onClick={() => signOut()}>Logout</Dropdown.Item>
+                        </DropdownButton>
+
+                    </div>
+                </Navbar.Collapse>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
+            </Navbar>
+        </>
+    )
 }

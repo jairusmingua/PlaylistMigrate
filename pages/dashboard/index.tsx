@@ -45,7 +45,7 @@ export default function Dashboard({ user }: { user: User }) {
   return (
     <>
       {user ? (
-        <>
+        <div className="container">
           <PageNavigation user={user}></PageNavigation>
           {loading ? (
             <>
@@ -55,18 +55,29 @@ export default function Dashboard({ user }: { user: User }) {
               </div>
             </>
           ) : (
-            <div className="container d-flex flex-wrap">
-              {playlist.map((item:Playlist)=>{
-                return(
+            <div className="container-fluid m-0 px-0 pt-0 grid" style={{paddingBottom:"200px"}}>
+              {playlist.map((item: Playlist) => {
+                return (
+
                   <PlaylistItem item={item}></PlaylistItem>
+
                 )
               })}
             </div>
-        )}
+          )}
 
-        </>
+        </div>
 
       ) : (<></>)}
+      <style jsx>
+      {
+        `.grid{
+          display: grid;
+          gap: 1rem;
+          grid-template-columns: repeat(auto-fill, minmax(157px, 1fr));
+        }`
+      }  
+      </style>
     </>
   )
 }
