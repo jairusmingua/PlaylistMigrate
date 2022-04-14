@@ -63,6 +63,10 @@ export default function Login({ props }) {
                 #__next{
                     height: 100%;
                 }
+                html,body {
+                    height: 100vh;
+                    width: 100vw;
+                }
                 `
             }</style>
         </div>

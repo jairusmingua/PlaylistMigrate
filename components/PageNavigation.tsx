@@ -22,7 +22,7 @@ export default function PageNavigation({ user }: { user: User }) {
                 <Navbar.Collapse className="justify-content-end">
                     <div className="d-flex justify-content-end gap-3 align-items-center">
 
-                        <Img src={user.image} fluid roundedCircle className="profilePic"></Img>
+                        {/* <Img src={user.image} fluid roundedCircle className="profilePic"></Img> */}
 
                         <DropdownButton
                             className="p-2"

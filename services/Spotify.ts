@@ -1,8 +1,10 @@
-import {Credentials,AuthType,OAuthType, SpotifyPlaylist} from './types';
+import { Credentials, AuthType, OAuthType, SpotifyPlaylist, Song } from './types';
 import { Account, Playlist, User } from '@prisma/client';
-import {secondDifference} from '../util'
+import { secondDifference } from '../util'
 import prisma from '../db/prisma';
 import cuid from 'cuid'
+import 'dotenv/config'
+
 export class Spotify {
 
     async refreshToken(account: Account): Promise<Account> {
@@ -25,24 +27,25 @@ export class Spotify {
                 auth_type: AuthType.spotify
             };
             return await prisma.account.update({
-                where:{
-                    id:account.id
+                where: {
+                    id: account.id
                 },
-                data:{
-                    accessToken:spotify_token_modified.access_token.toString()
+                data: {
+                    accessToken: spotify_token_modified.access_token.toString()
                 }
             });
         } catch (error) {
             throw error
         }
-       
+
     }
-    async getPlaylists(account: Account):Promise<Array<Playlist>>{
+    async getPlaylists(account: Account): Promise<Array<Playlist>> {
         try {
-            if (secondDifference(account.updatedAt)>3600){
-                account = await this.refreshToken(account)   
+            if (secondDifference(account.updatedAt) > 3600) {
+                account = await this.refreshToken(account)
             }
-            const url = "https://api.spotify.com/v1/me/playlists";
+            
+            const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists`;
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -50,57 +53,74 @@ export class Spotify {
                     "Accept": "application/json",
                 }
             });
-            if (response.status == 401){
+            if (response.status == 401) {
                 throw response.json()
             }
             const data = await response.json();
-            const playlist : Array<Playlist> = []
-            Array.from(data.items).map((item)=>{
+            const playlist: Array<Playlist> = []
+            Array.from(data.items).map((item) => {
                 let i = new SpotifyPlaylist(item)
                 playlist.push({
-                    title:i.name,
-                    image:i.image['url'],
-                    userId:account.userId,
-                    id:cuid(),
-                    description:i.description,
-                    platform:"SPOTIFY",
-                    url:"",
-                    external_id:i.id,
+                    title: i.name,
+                    image: i.image['url'],
+                    userId: account.userId,
+                    id: cuid(),
+                    description: i.description,
+                    platform: 'SPOTIFY',
+                    url: '',
+                    external_id: i.id,
                     createdAt: new Date(),
                     updatedAt: new Date()
-                    
+
                 })
             })
             return playlist
-            
+
         } catch (error) {
             throw error;
         }
     }
-    // async getUserProfile(token:string):Promise<SpotifyProfile>{
-    //     try {
-    //         const url = 'https://api.spotify.com/v1/me';
-    //         const response = await fetch(url, {
-    //             method: 'GET',
-    //             headers: {
-    //                 "Authorization": `Bearer ${token}`,
-    //                 "Accept": "application/json",
-    //             }
-    //         });
-    //         const data = await response.json()
-    //         const profile = new SpotifyProfile(data);
-    //         return profile;
+    async getPlaylistSongs(playlistId, account: Account) {
+        try {
+            console.log(playlistId);
+            console.log(account);
             
-    //     } catch (error) {
-    //         throw error
-    //     }
-      
-    // }
+            if (secondDifference(account.updatedAt) > 3600) {
+                account = await this.refreshToken(account)
+            }
+            const url = `${process.env.SPOTIFY_BASE_URL}/v1/playlists/${playlistId}/tracks`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${account.accessToken}`,
+                    "Accept": "application/json",
+                }
+            });
+            if (response.status == 401) {
+                throw response.json()
+            }
+            const data = await response.json();
+            let songs = data.items
+            songs = songs.map((song)=>{
+                const track = song.track
+                return {
+                    title: track.name,
+                    image: track.album.images[0].url,
+                    artist: track.album.artists
+                }
+            })
+
+            return songs
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 declare const global: NodeJS.Global & { spotify: Spotify };
 
 const spotify = global.spotify || new Spotify();
-if (process.env.NODE_ENV === "development") global.spotify = spotify;
+if (process.env.NODE_ENV === 'development') global.spotify = spotify;
 
 export default spotify;

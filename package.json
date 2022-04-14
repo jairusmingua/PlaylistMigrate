@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "set NODE_OPTIONS=--inspect && next dev",
     "build": "next build",
-    "start": "next start -p $PORT"
+    "start": "next start -p $PORT",
+    "worker": "node worker.js"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^0.5.2",
@@ -16,10 +17,13 @@
     "axios": "^0.21.1",
     "babel-plugin-superjson-next": "^0.3.0",
     "bootstrap": "^4.5.3",
+    "bullmq": "^1.80.0",
     "cuid": "^2.1.8",
+    "dotenv": "^16.0.0",
     "googleapis": "^65.0.0",
     "next": "10.0.1",
     "next-auth": "^3.27.3",
+    "nodemon": "^2.0.15",
     "react": "17.0.1",
     "react-bootstrap": "^1.4.0",
     "react-dom": "17.0.1",

@@ -1,5 +1,6 @@
 import { signOut, useSession, getSession } from 'next-auth/client'
 import { NextApiRequest, NextApiResponse } from 'next'
+import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -14,6 +15,7 @@ import PageNavigation from '../../components/PageNavigation'
 import axios from 'axios'
 import { SpotifyPlaylist } from '../../services/types'
 import PlaylistItem from '../../components/PlaylistItem'
+import { spotifyQueue } from '../../queue'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
@@ -28,7 +30,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       email: session.user.email,
     }
   })
-
+  // spotifyQueue.add('migrate song', {
+  //   songs:{
+  //     id:123,
+  //     name: 'Test',
+  //     url: 'test.com'
+  //   }
+  // })
+  
   return { props: { user: user } }
 
 };
@@ -37,7 +46,7 @@ export default function Dashboard({ user }: { user: User }) {
   const [playlist, setPlaylist] = useState([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    axios.get('api/profile').then((res) => {
+    axios.get('/api/profile').then((res) => {
       setPlaylist(res.data['playlists'])
       setLoading(false)
     })
@@ -49,7 +58,7 @@ export default function Dashboard({ user }: { user: User }) {
           <PageNavigation user={user}></PageNavigation>
           {loading ? (
             <>
-              <div className="d-flex justify-content-center loading">
+              <div className="d-flex justify-content-center align-items-center loading">
                 <Spinner animation="border" role="status">
                 </Spinner>
               </div>
