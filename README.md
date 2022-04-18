@@ -3,7 +3,7 @@
   <img height=50 src="img/logo.png" />
 </p>
 
-A platform that allows user migrate their spotify playlist to youtube playlist and vice-verse.
+A platform that allows user migrate their spotify playlist to youtube playlist and vice versa.
 <br>
 <br>
 # Pre-requisites
