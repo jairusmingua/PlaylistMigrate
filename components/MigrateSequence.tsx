@@ -73,12 +73,10 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                             setNotFoundSongs([...notFoundSongs, currentSourceSong])
                             setNotFoundCount(notFoundCount + 1)
                             setCurrentIndex(currentIndex + 1)
-                            console.log(currentSourceSong)
                         } else {
                             setNotFoundSongs([...notFoundSongs, currentSourceSong])
                             setNotFoundCount(notFoundCount + 1)
                             setIsCollected(true)
-                            console.log(currentSourceSong)
                             // alert('Done Migrating!')
                             if (notFoundCount != 0) {
                                 setShowReport(true)
