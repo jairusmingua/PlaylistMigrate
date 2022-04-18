@@ -50,6 +50,7 @@ export enum TokenType {
     queryString = "tokenType"
 }
 
+export type ServiceType = 'SPOTIFY' | 'YT'
 export interface OAuthType {
     access_token?: String;
     refresh_token?: String;

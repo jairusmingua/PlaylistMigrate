@@ -30,13 +30,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       email: session.user.email,
     }
   })
-  // spotifyQueue.add('migrate song', {
-  //   songs:{
-  //     id:123,
-  //     name: 'Test',
-  //     url: 'test.com'
-  //   }
-  // })
   
   return { props: { user: user } }
 

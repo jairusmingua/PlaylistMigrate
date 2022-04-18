@@ -12,8 +12,8 @@ export default function PageNavigation({ user }: { user: User }) {
                 <Navbar.Brand href="/dashboard" className="justify-content-between align-items-center d-flex p-0 m-0">
                     <Image
                         src="/icon.svg"
-                        width={50}
-                        height={50}
+                        width={20}
+                        height={20}
                     />
                     <span className="p-2">
                         PlaylistMigrate

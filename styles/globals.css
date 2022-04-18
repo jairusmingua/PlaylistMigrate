@@ -22,7 +22,9 @@ a {
   border-radius: 30px !important;
 
 }
-
+i{
+  font-size: 30px;
+}
 .btn-dark {
   background-color: #0A0000 !important;
 }
@@ -53,8 +55,30 @@ nav {
   bottom: 0;
 }
 
-
 .profilePic {
   height: 10%;
   width: 10%;
+}
+
+.playlistCard{
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+}
+.playlistCard:hover{
+  transform: scale(1.05);
+  background-color: #0f0f0f !important;
+}
+.playlistSongItem{
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+}
+.playlistSongItem:hover{
+  background-color: #0f0f0f !important;
+}
+
+.playlistCardText{
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
