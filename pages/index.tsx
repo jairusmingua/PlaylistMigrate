@@ -1,12 +1,28 @@
 import { Suspense } from 'react'
+import { signOut, useSession, getSession } from 'next-auth/client'
 import { Canvas, extend } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import { Navbar, Container, Button } from 'react-bootstrap'
+import { GetServerSideProps } from "next";
 
 import Nav from '../components/Nav';
 import { Footer } from '../components/Footer';
 
 extend({ OrbitControls });
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+
+  const session = await getSession({ req });
+  if (session) {
+    res.statusCode = 302
+    res.setHeader('Location', `/dashboard`)
+    return { props: {} }
+  }
+
+  return { props: {} }
+
+};
+
 
 function Home({ props }) {
   function Hero() {
@@ -101,7 +117,7 @@ function Home({ props }) {
           </div>
         </div>
       </section>
-      <Footer/>
+      <Footer />
       <style jsx>{
         `
         .section-1{
