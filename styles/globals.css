@@ -82,3 +82,26 @@ nav {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+ul{
+  padding: 0 !important;
+}
+li{
+  list-style: none !important;
+}
+
+.settingsList{
+  font-size: 25px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.settingsList:hover{
+  font-size: 25px;
+  background-color: rgba(0, 0, 0, 0.315);
+}
+
+.settingsPanel{
+  background-color: rgba(0, 0, 0, 0.315);
+  border-radius: 20px;
+}

@@ -30,6 +30,7 @@ export default function PageNavigation({ user }: { user: User }) {
                             variant="secondary"
                             id="input-group-dropdown-1"
                         >
+                            <Dropdown.Item href="/settings">Settings</Dropdown.Item>
                             <Dropdown.Item href="#" onClick={() => signOut()}>Logout</Dropdown.Item>
                         </DropdownButton>
 
