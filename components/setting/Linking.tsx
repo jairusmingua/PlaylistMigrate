@@ -12,7 +12,7 @@ const Linking: FunctionComponent<LinkingProps> = (props) => {
 
     function handleSignin(provider, account: Account) {
         if (!account) {
-            signIn(provider, { callbackUrl: callbackUrl })
+            signIn(provider, { callbackUrl: callbackUrl})
         }
     }
     return (
@@ -22,7 +22,7 @@ const Linking: FunctionComponent<LinkingProps> = (props) => {
                     <p>In order to use PlaylistMigrate, link two or more accounts.</p>
                 </div>
                 <div className="row">
-                    <div className="col">
+                    <div className="col py-2">
                         <button className="btn btn-dark" onClick={() => handleSignin('spotify', accounts.filter(val => val.providerId == 'spotify')[0])}>
                             <div className="d-flex justify-content-between">
 
@@ -45,7 +45,7 @@ const Linking: FunctionComponent<LinkingProps> = (props) => {
                             </div>
                         </button>
                     </div>
-                    <div className="col">
+                    <div className="col py-2">
                         <button className="btn btn-dark" onClick={() => handleSignin('google', accounts.filter(val => val.providerId == 'google')[0])}>
                             <div className="d-flex justify-content-between p-0 m-0">
                                 <div className="d-flex justify-content-start align-items-center">

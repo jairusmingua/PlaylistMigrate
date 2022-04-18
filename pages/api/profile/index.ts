@@ -19,6 +19,9 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
             
         })
         const spotifyCredentials = user.accounts.filter(accounts=> accounts.providerId=="spotify")[0]
+        if (!spotifyCredentials){
+            return res.status(200).json(user)
+        }
         const playlist = await spotify.getPlaylists(spotifyCredentials);
         if (playlist.length>user.playlists.length){
             playlist.map((item)=>{

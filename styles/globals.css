@@ -97,11 +97,21 @@ li{
 }
 
 .settingsList:hover{
-  font-size: 25px;
+  background-color: rgba(0, 0, 0, 0.315);
+}
+
+.settingsList.active{
   background-color: rgba(0, 0, 0, 0.315);
 }
 
 .settingsPanel{
   background-color: rgba(0, 0, 0, 0.315);
   border-radius: 20px;
+}
+
+.settingsList > i {
+  font-size: 3.5vmin;
+}
+.settingsList > span {
+  font-size: 3.5vmin;
 }

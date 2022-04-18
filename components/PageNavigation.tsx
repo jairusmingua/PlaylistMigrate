@@ -29,9 +29,12 @@ export default function PageNavigation({ user }: { user: User }) {
                             title={user.name}
                             variant="secondary"
                             id="input-group-dropdown-1"
+                            menuAlign="right"
                         >
                             <Dropdown.Item href="/settings">Settings</Dropdown.Item>
-                            <Dropdown.Item href="#" onClick={() => signOut()}>Logout</Dropdown.Item>
+                            <Dropdown.Item href="#" onClick={() => signOut({
+                                callbackUrl:'/'
+                            })}>Logout</Dropdown.Item>
                         </DropdownButton>
 
                     </div>
