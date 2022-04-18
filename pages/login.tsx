@@ -42,7 +42,7 @@ export default function Login({ props }) {
                                 </div>
                             </Button>
 
-                            <Button disabled variant="dark" size="lg" className="my-1" onClick={() => signIn("google")}>
+                            <Button variant="dark" size="lg" className="my-1" onClick={() => signIn("google")}>
                                 <div className="d-flex">
                                     <div className="w-75">
                                         Login with Youtube
