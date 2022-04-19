@@ -19,7 +19,6 @@ const Linking: FunctionComponent<LinkingProps> = ({accounts}) => {
             <div className="container p-5">
                 <div className="row pb-3">
                     <p>In order to use PlaylistMigrate, link two or more accounts.</p>
-                    {callbackUrl}
                 </div>
                 <div className="row">
                     <div className="col py-2">

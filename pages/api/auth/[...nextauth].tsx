@@ -1,10 +1,10 @@
 
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getSession } from 'next-auth/client'
+import { getSession, getProviders } from 'next-auth/client'
 import NextAuth from 'next-auth'
 import Providers from 'next-auth/providers'
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient, User } from "@prisma/client"
+import { PrismaClient, User, Account } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
@@ -27,15 +27,21 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                 if (!session) {
                     return true
                 }
-                const _user: User = await prisma.user.findUnique({
-                    where: {
-                        email: session.user.email,
+                console.log(account)
+                console.log(account.id)
+                const _account: Account = await prisma.account.findFirst(
+                    {
+                        where:{
+                            userId: account.id
+                        }
                     }
-                })
-                if (account.id == _user.id) {
-                    return true
+                )
+
+                if (_account) {
+                    return '/settings?linking-success=false'
                 }
-                return '/settings?linking-success=false';
+
+                return true;
             },
             async session(session, user) {
                 return session
