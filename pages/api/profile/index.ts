@@ -1,7 +1,8 @@
 //redirects user to respective auth sites
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getSession, GetSessionOptions } from 'next-auth/client';
-import prisma from '../../../db/prisma';
+import { prisma } from '../../../db/prisma';
+import { getOauthAccount } from '../../../repositories/UserRepository';
 import spotify from '../../../services/Spotify'
 
 export default async (_: NextApiRequest, res: NextApiResponse) => {
@@ -12,36 +13,36 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
             where: {
                 email: session.user.email
             },
-            include:{
-                playlists:true,
-                accounts:true,
+            include: {
+                playlists: true,
+                accounts: true,
             }
-            
+
         })
-        const spotifyCredentials = user.accounts.filter(accounts=> accounts.providerId=="spotify")[0]
-        if (!spotifyCredentials){
+        const spotifyCredentials = getOauthAccount(user.accounts, 'Spotify')
+        if (!spotifyCredentials) {
             return res.status(200).json(user)
         }
         const playlist = await spotify.getPlaylists(spotifyCredentials);
-        if (playlist.length>user.playlists.length){
-            playlist.map((item)=>{
+        if (playlist.length > user.playlists.length) {
+            playlist.map((item) => {
                 prisma.playlist.upsert({
-                    update:{
-                        title:item.title,
-                        image:item.image,
-                        description:item.description.toString(),
-                        platform:"SPOTIFY",
-                        url:"",
+                    update: {
+                        title: item.title,
+                        image: item.image,
+                        description: item.description.toString(),
+                        platform: 'SPOTIFY',
+                        url: '',
                         updatedAt: new Date()
                     },
-                    create:item,
-                    where:{
-                        external_id:item.external_id
+                    create: item,
+                    where: {
+                        external_id: item.external_id
                     }
-                }).then((item)=>{return item}).catch((err)=>{throw err});
+                }).then((item) => { return item }).catch((err) => { throw err });
             })
         }
-        if (!playlist){
+        if (!playlist) {
             throw "Playlist Error"
         }
         res.status(200).json(user)

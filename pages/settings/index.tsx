@@ -5,31 +5,17 @@ import { Container, Card, Row, Col, Button, Modal, Alert } from 'react-bootstrap
 import { useEffect, useState } from 'react'
 import { Playlist, PrismaClient } from "@prisma/client"
 import { GetServerSideProps } from "next";
-import prisma from '../../db/prisma'
+import { prisma } from '../../db/prisma'
 import PageNavigation from '../../components/PageNavigation';
 import Linking from '../../components/setting/Linking';
 import Preference from '../../components/setting/Preference';
 import Privacy from '../../components/setting/Privacy';
+import { getUser } from "../../repositories/UserRepository";
+import Head from "next/head";
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-
-    const session = await getSession({ req });
-    if (!session) {
-        res.statusCode = 302
-        res.setHeader('Location', `/login`)
-        return { props: {} }
-    }
-    const user = await prisma.user.findUnique({
-        where: {
-            email: session.user.email,
-        },
-        include: {
-            accounts: true,
-        }
-    })
-    return { props: { user: user } }
-
+    return { props: { user: await getUser(req, res) } }
 };
 
 export default function Settings({ user }) {
@@ -39,6 +25,9 @@ export default function Settings({ user }) {
 
     return (
         <>
+            <Head>
+                <title>PlaylistMigrate | Settings</title>
+            </Head>
             <div className="container">
                 <PageNavigation user={user}></PageNavigation>
                 <div className="row p-4">
@@ -62,8 +51,8 @@ export default function Settings({ user }) {
                     <div className="col-12 col-sm-12 col-lg-8">
                         {
                             show &&
-                            <Alert variant={query['linking-success'] == 'true' ? 'success':'warning'} onClose={() => setShow(false)} dismissible>
-                                <strong>{query['linking-success'] == 'true' ? 'Great!':'Oh No!'}</strong> {query['linking-success'] == 'true' ? 'Account was successfully Linked.':'Account linking failed.'}
+                            <Alert variant={query['linking-success'] == 'true' ? 'success' : 'warning'} onClose={() => setShow(false)} dismissible>
+                                <strong>{query['linking-success'] == 'true' ? 'Great!' : 'Oh No!'}</strong> {query['linking-success'] == 'true' ? 'Account was successfully Linked.' : 'Account linking failed.'}
                             </Alert>
                         }
                         <div className="settingsPanel shadow-sm">

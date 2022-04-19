@@ -22,7 +22,7 @@ export default function Login({ props }) {
     return (
         <>
             <Head>
-                <title>PlayistMigrate | Login</title>
+                <title>PlaylistMigrate | Login</title>
             </Head>
             <div className="h-100 d-flex flex-column justify-content-center">
 

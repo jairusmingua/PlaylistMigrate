@@ -1,11 +1,9 @@
 import { User } from "@prisma/client";
 import { signOut } from "next-auth/client";
 import Image from 'next/image'
-import Link from "next/link";
 import { Navbar, NavDropdown, DropdownButton, Dropdown, Nav, Image as Img } from "react-bootstrap";
-import { useRef } from "react";
+
 export default function PageNavigation({ user }: { user: User }) {
-    const dropDownRef = useRef(0)
     return (
         <>
             <Navbar variant="dark" className="p-0">

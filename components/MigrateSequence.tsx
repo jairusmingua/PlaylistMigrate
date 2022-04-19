@@ -116,7 +116,7 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
     return (
         <>
             <Head>
-                <title>PlayistMigrate | Migrating...</title>
+                <title>PlaylistMigrate | {statusMsg}</title>
             </Head>
             {loading ? (
                 <>

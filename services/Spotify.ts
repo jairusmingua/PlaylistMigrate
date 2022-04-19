@@ -1,7 +1,7 @@
 import { Credentials, AuthType, OAuthType, SpotifyPlaylist, Song } from './types';
 import { Account, Playlist, User } from '@prisma/client';
 import { secondDifference } from '../util'
-import prisma from '../db/prisma';
+import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
 

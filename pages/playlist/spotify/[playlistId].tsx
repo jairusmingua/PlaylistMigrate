@@ -4,36 +4,25 @@ import { Container, Card, Row, Col, Button, Modal } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
 import { Playlist, PrismaClient } from "@prisma/client"
 import { GetServerSideProps } from "next";
-import prisma from '../../../db/prisma'
+import { prisma } from '../../../db/prisma'
 import { User } from '.prisma/client'
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { Spinner } from 'react-bootstrap';
 import MigrateSequence from '../../../components/MigrateSequence';
 import Head from 'next/head';
+import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
-  const session = await getSession({ req });
-  if (!session) {
-    res.statusCode = 302
-    res.setHeader('Location', `/login`)
-    return { props: {} }
-  }
-  const user = await prisma.user.findUnique({
-    where: {
-      email: session.user.email,
-    },
-    include: {
-      accounts: true,
-    }
-  })
-  const spotifyCredentials = user.accounts.filter(accounts => accounts.providerId == "spotify")[0]
-  return { props: { user: user, spotifyCredentials: spotifyCredentials } }
+  const user = await getUser(req, res)
+  const spotifyCredentials = getOauthAccount(user.accounts, 'Spotify')
+  const youtubeCredentials = getOauthAccount(user.accounts, 'Google')
+  return { props: { user: user, spotifyCredentials, youtubeCredentials } }
 
 };
 
-export default function PlaylistView({ user, session, spotifyCredentials }) {
+export default function PlaylistView({ user, spotifyCredentials, youtubeCredentials }) {
   const router = useRouter()
   const { playlistId } = router.query
   const [playlist, setPlaylist] = useState(null);
@@ -151,7 +140,7 @@ export default function PlaylistView({ user, session, spotifyCredentials }) {
                                 <h4>{song.track.name}</h4>
                                 <span>
                                   {
-                                    song.track.artists.map((artist, i) => <>{artist.name}{song.track.artists.length == i + 1 ? '' : ','}  </>)
+                                    song.track.artists.map((artist, i) => <span key={i}>{artist.name}{song.track.artists.length == i + 1 ? '' : ','}  </span>)
                                   }
                                 </span>
                               </div>
@@ -177,7 +166,7 @@ export default function PlaylistView({ user, session, spotifyCredentials }) {
                                 <h4>{song.track.name}</h4>
                                 <span>
                                   {
-                                    song.track.artists.map((artist, i) => <>{artist.name}{song.track.artists.length == i + 1 ? '' : ','}  </>)
+                                    song.track.artists.map((artist, i) => <span key={i}>{artist.name}{song.track.artists.length == i + 1 ? '' : ','}  </span>)
                                   }
                                 </span>
                               </div>

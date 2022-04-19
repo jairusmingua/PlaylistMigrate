@@ -35,7 +35,7 @@ function Home({ props }) {
   return (
     <>
       <Head>
-        <title>PlayistMigrate</title>
+        <title>PlaylistMigrate</title>
       </Head>
       <div className="container-fluid m-0 p-0">
         <Nav></Nav>
