@@ -49,7 +49,7 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                 const artist = currentSourceSong.artist
                 const _source = source
                 setCurrentDestinationSong(currentSourceSong)
-                axios.get(`http://192.168.1.23:8000/api/v1/search?artist=${artist}&title=${title}&source=${_source}`)
+                axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${artist}&title=${title}&source=${_source}`)
                     .then((response) => {
                         if (currentIndex < songs.length - 1) {
                             // setInterval(()=>{
