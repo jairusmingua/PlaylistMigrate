@@ -27,8 +27,6 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                 if (!session) {
                     return true
                 }
-                console.log(account)
-                console.log(account.id)
                 const _account: Account = await prisma.account.findFirst(
                     {
                         where:{
