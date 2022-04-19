@@ -6,20 +6,20 @@ interface LinkingProps {
     accounts: Array<Account>;
 }
 
-const Linking: FunctionComponent<LinkingProps> = (props) => {
-    const accounts = props.accounts
-    const callbackUrl = 'http://localhost:3000/settings?linking-success=true'
-
+const Linking: FunctionComponent<LinkingProps> = ({accounts}) => {
     function handleSignin(provider, account: Account) {
         if (!account) {
             signIn(provider, { callbackUrl: callbackUrl})
         }
     }
+    const callbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/settings?linking-success=true`
+
     return (
         <>
             <div className="container p-5">
                 <div className="row pb-3">
                     <p>In order to use PlaylistMigrate, link two or more accounts.</p>
+                    {callbackUrl}
                 </div>
                 <div className="row">
                     <div className="col py-2">
