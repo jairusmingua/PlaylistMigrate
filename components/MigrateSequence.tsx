@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navbar, Container, Button, Spinner } from 'react-bootstrap';
 
 import axios from 'axios'
+import Head from 'next/head';
 
 function MigrateSequence({ source, destination, playlistName, playlistId, start, onStart, onCancel, onFinish, credentials }) {
     const [songs, setSongs] = useState(undefined);
@@ -114,6 +115,9 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
     }, [currentIndex]);
     return (
         <>
+            <Head>
+                <title>PlayistMigrate | Migrating...</title>
+            </Head>
             {loading ? (
                 <>
                     <div className="d-flex justify-content-center align-items-center loading">

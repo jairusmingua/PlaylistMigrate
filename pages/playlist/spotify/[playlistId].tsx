@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { Spinner } from 'react-bootstrap';
 import MigrateSequence from '../../../components/MigrateSequence';
+import Head from 'next/head';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
@@ -100,6 +101,9 @@ export default function PlaylistView({ user, session, spotifyCredentials }) {
   }, [playlistId]);
   return (
     <>
+      <Head>
+        <title>PlayistMigrate | {playlist?.name}</title>
+      </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
         <a className="btn-outline-light" href="/dashboard">
           <i className="bi bi-arrow-left"></i>
@@ -208,7 +212,7 @@ export default function PlaylistView({ user, session, spotifyCredentials }) {
                         <p>Select <b>Platform</b> to Migrate your playlist: </p>
                         <form>
                           <div className="form-check d-flex align-items-center">
-                            <input type="checkbox" className="form-check-input" checked/>
+                            <input type="checkbox" className="form-check-input" checked />
                             <label className="form-check-label d-flex align-items-center">
                               <img src="/youtube.png" height="30px" width="30px" />
                               <span>Youtube Music</span>

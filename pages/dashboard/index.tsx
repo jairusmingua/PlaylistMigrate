@@ -18,7 +18,6 @@ import PlaylistItem from '../../components/PlaylistItem'
 import { spotifyQueue } from '../../queue'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-
   const session = await getSession({ req });
   if (!session) {
     res.statusCode = 302
@@ -30,9 +29,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       email: session.user.email,
     }
   })
-  
   return { props: { user: user } }
-
 };
 
 export default function Dashboard({ user }: { user: User }) {
@@ -46,6 +43,9 @@ export default function Dashboard({ user }: { user: User }) {
   }, []);
   return (
     <>
+      <Head>
+        <title>PlayistMigrate | Dashboard</title>
+      </Head>
       {user ? (
         <div className="container">
           <PageNavigation user={user}></PageNavigation>
@@ -57,7 +57,7 @@ export default function Dashboard({ user }: { user: User }) {
               </div>
             </>
           ) : (
-            <div className="container-fluid m-0 px-0 pt-0 grid" style={{paddingBottom:"200px"}}>
+            <div className="container-fluid m-0 px-0 pt-0 grid" style={{ paddingBottom: "200px" }}>
               {playlist.map((item: Playlist) => {
                 return (
 
@@ -72,13 +72,13 @@ export default function Dashboard({ user }: { user: User }) {
 
       ) : (<></>)}
       <style jsx>
-      {
-        `.grid{
+        {
+          `.grid{
           display: grid;
           gap: 1rem;
           grid-template-columns: repeat(auto-fill, minmax(157px, 1fr));
         }`
-      }  
+        }
       </style>
     </>
   )
