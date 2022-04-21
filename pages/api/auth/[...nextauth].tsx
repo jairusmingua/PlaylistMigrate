@@ -18,7 +18,9 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
             }),
             Providers.Google({
                 clientId: process.env.YOUTUBE_CLIENT_ID,
-                clientSecret: process.env.YOUTUBE_CLIENT_SECRET
+                clientSecret: process.env.YOUTUBE_CLIENT_SECRET,
+                scope:'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube.force-ssl',
+                authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&access_type=offline&response_type=code'
             })
         ],
         callbacks: {

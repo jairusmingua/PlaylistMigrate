@@ -91,7 +91,7 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
   return (
     <>
       <Head>
-        <title>PlayistMigrate | {playlist?.name}</title>
+        <title>PlayistMigrate {playlist?.name ? `| ${playlist?.name}`: ''}</title>
       </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
         <a className="btn-outline-light" href="/dashboard">
@@ -228,15 +228,17 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
               </div>
             ) : (
               <MigrateSequence
-                credentials={spotifyCredentials}
+                sourceCredentials={spotifyCredentials}
+                destinationCredentials={youtubeCredentials}
                 onCancel={handleStopMigration}
                 onFinish={handleFinishMigration}
                 onStart={() => console.log('starting')}
                 source='SPOTIFY'
                 destination='YT'
-                playlistName='SAMPLE'
+                playlistName={playlist?.name}
                 playlistId={playlistId}
                 start={isMigrating}
+                playlistThumbnail={playlist.image}
 
               />
             )
