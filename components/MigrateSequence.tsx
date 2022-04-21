@@ -4,7 +4,7 @@ import { Navbar, Container, Button, Spinner } from 'react-bootstrap';
 import axios from 'axios'
 import Head from 'next/head';
 
-function MigrateSequence({ source, destination, playlistName, playlistId, start, onStart, onCancel, onFinish, credentials }) {
+function MigrateSequence({ source, destination, playlistName, playlistId, start, onStart, onCancel, onFinish, sourceCredentials, destinationCredentials, playlistThumbnail }) {
     const [songs, setSongs] = useState(undefined);
     const [currentSourceSong, setCurrentSourceSong] = useState(undefined);
     const [currentDestinationSong, setCurrentDestinationSong] = useState(null);
@@ -17,106 +17,164 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
     const [notFoundSongs, setNotFoundSongs] = useState([]);
     const [foundSongs, setFoundSongs] = useState([]);
     const [showReport, setShowReport] = useState(false);
-    useEffect(() => {
-        if (source == 'SPOTIFY') {
-            if (playlistId != undefined) {
-                const songs = async () => {
-                    let { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-                        headers: {
-                            'Authorization': `Bearer ${credentials.accessToken}`,
-                            'Accept': 'application/json'
-                        }
-                    })
-                    setSongs(data.items)
-                    setPlaylistSize(data.total)
+    async function youtubeInsert(playlistId, songs, index) {
+        if (index < length) {
+            let payload = {
+                "snippet": {
+                    "playlistId": playlistId,
+                    "position": 0,
+                    "resourceId": {
+                        "kind": "youtube#video",
+                        "videoId": songs[index].external_id
+                    }
                 }
-                songs().then(() => {
-                    setLoading(false)
-                }).catch((err) => console.log(err))
+            }
+            try {
+                let { data } = await axios.post(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet`, payload, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${destinationCredentials.accessToken}`
+                    }
+                })
+
+            } catch (error) {
+                return false
+            }
+            let _index = index + 1
+            youtubeInsert(playlistId, songs, _index)
+        }
+        return true
+
+    }
+    async function insertPlaylist(playlistId, foundSongs) {
+        console.log('insertPlaylist')
+        if (source == 'SPOTIFY' && destination == 'YT') {
+            console.log(`Inserting ${playlistId}`)
+            try {
+                youtubeInsert(playlistId, foundSongs, 0)
+
+            } catch (error) {
+                console.log(error);
+
+            }
+
+        }
+
+    }
+    async function createPlaylist() {
+        console.log('createPlaylist')
+        if (source == 'SPOTIFY' && destination == 'YT') {
+            const payload = {
+                "snippet": {
+                    "title": playlistName,
+                    "description": `This is migrated playlist from ${source}`,
+                    "tags": [
+                        "playlistmigrate",
+                        playlistName
+                    ],
+                    "defaultLanguage": "en"
+                },
+                "status": {
+                    "privacyStatus": "private"
+                }
+            }
+
+            try {
+                let { data } = await axios.post(`https://youtube.googleapis.com/youtube/v3/playlists?part=snippet%2Cstatus`, payload, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${destinationCredentials.accessToken}`
+                    }
+                })
+                return data.id
+
+            } catch (error) {
+                console.log(error)
             }
         }
-    }, []);
-    useEffect(() => {
-        if (songs != undefined) {
-            setCurrentIndex(0)
-            setStatusMsg('Collecting Songs from Database...')
-        }
-    }, [songs]);
-    useEffect(() => {
-        if (currentSourceSong != undefined && !isCollected) {
-            if (songs[currentIndex].track.id != null) {
 
-                const title = currentSourceSong.title
-                const artist = currentSourceSong.artist
-                const _source = source
-                setCurrentDestinationSong(currentSourceSong)
-                axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${artist}&title=${title}&source=${_source}`)
-                    .then((response) => {
-                        if (currentIndex < songs.length - 1) {
-                            // setInterval(()=>{
-                            setCurrentIndex(currentIndex + 1)
-                            setFoundSongs([...foundSongs, response.data.result])
-                            // }, 2000)
-                        } else {
-                            setIsCollected(true)
-                            // alert('Done Migrating!')
-                            if (notFoundCount != 0) {
-                                setShowReport(true)
-                            } else {
-                                onFinish()
+    }
+    async function collectSongs() {
+        console.log('collectSongs')
+        let _notFoundCount = 0
+        let _foundCount = 0
+        let _foundSongs = []
+        let _notFoundSongs = []
+        if (source == 'SPOTIFY') {
+            let { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+                headers: {
+                    'Authorization': `Bearer ${sourceCredentials.accessToken}`,
+                    'Accept': 'application/json'
+                }
+            })
+            let songs = data.items
+            setPlaylistSize(data.total)
 
-                            }
-                        }
-
-                    }).catch((response) => {
-                        // alert(response.response.data.message)
-                        if (currentIndex < songs.length - 1) {
-                            setNotFoundSongs([...notFoundSongs, currentSourceSong])
-                            setNotFoundCount(notFoundCount + 1)
-                            setCurrentIndex(currentIndex + 1)
-                        } else {
-                            setNotFoundSongs([...notFoundSongs, currentSourceSong])
-                            setNotFoundCount(notFoundCount + 1)
-                            setIsCollected(true)
-                            // alert('Done Migrating!')
-                            if (notFoundCount != 0) {
-                                setShowReport(true)
-                            } else {
-                                onFinish()
-
-                            }
-                        }
-                    })
-            }
-        }
-    }, [currentSourceSong]);
-    useEffect(() => {
-        if (currentIndex != undefined && !isCollected) {
-            if (songs[currentIndex].track.id != null) {
-
-                const title = source == 'SPOTIFY' ? songs[currentIndex]['track']['name'] : ''
-                const artist = source == 'SPOTIFY' ? songs[currentIndex]['track']['artists'][0]['name'] : ''
-                const thumbnail_src = source == 'SPOTIFY' ? songs[currentIndex]['track']['album']['images'][0]['url'] : ''
+            setLoading(false)
+            for (let i = 0; i < songs.length; i++) {
+                setCurrentIndex(i)
+                const title = source == 'SPOTIFY' ? songs[i]['track']['name'] : ''
+                const artist = source == 'SPOTIFY' ? songs[i]['track']['artists'][0]['name'] : ''
+                const thumbnail_src = source == 'SPOTIFY' ? songs[i]['track']['album']['images'][0]['url'] : ''
                 const _source = source == 'SPOTIFY' ? 'SPOTIFY' : ''
-                const url = source == 'SPOTIFY' ? songs[currentIndex]['track']['external_urls']['spotify'] : ''
-                const external_id = source == 'SPOTIFY' ? songs[currentIndex]['track']['external_ids']['isrc'] : ''
-                setCurrentSourceSong({
+                const url = source == 'SPOTIFY' ? songs[i]['track']['external_urls']['spotify'] : ''
+                const isrc = source == 'SPOTIFY' ? songs[i]['track']['external_ids']['isrc'] : ''
+                setCurrentDestinationSong({
                     'title': title,
                     'artist': artist,
                     'thumbnail_src': thumbnail_src,
                     'source': _source,
                     'url': url,
-                    'external_id': external_id
+                    'isrc': isrc
                 })
-            } else {
-                setCurrentIndex(currentIndex + 1)
+                await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${artist}&title=${title}&source=${_source}&isrc=${isrc}`)
+                    .then((response) => {
+                        _foundSongs.push(response.data.result)
+                        setFoundSongs(_foundSongs)
+                        _foundCount += 1
+                    }).catch((response) => {
+                        _notFoundSongs.push({
+                            'title': title,
+                            'artist': artist,
+                            'thumbnail_src': thumbnail_src,
+                            'source': _source,
+                            'url': url,
+                            'isrc': isrc
+                        })
+                        setNotFoundSongs(_notFoundSongs)
+                        _notFoundCount += 1
+                        setNotFoundCount(_notFoundCount)
+                    })
+
             }
         }
-    }, [currentIndex]);
+        return _foundSongs
+
+    }
+    async function startMigrate() {
+        console.log('startMigrate')
+        setStatusMsg('Collecting Songs from Database...')
+        let foundSongs = await collectSongs()
+        setStatusMsg('Creating Playlist...')
+        let playlistId = await createPlaylist()
+        setStatusMsg('Inserting Songs to Playlist...')
+        let result = await insertPlaylist(playlistId, foundSongs)
+    }
+
+    useEffect(() => {
+        if (source == 'SPOTIFY' && playlistId != undefined && playlistName != undefined && playlistThumbnail) {
+            startMigrate().then(() => {
+                onFinish()
+            })
+        }
+    }, []);
+
     return (
         <>
             <Head>
-                <title>PlaylistMigrate | {statusMsg}</title>
+                <title>PlaylistMigrate {statusMsg ? `| ${statusMsg}` : ''}</title>
             </Head>
             {loading ? (
                 <>
@@ -135,21 +193,6 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                                 </div>
 
                                 <div className="row pt-5">
-                                    {/* <div className="col-12 col-lg-5 col-sm-12 py-5 d-flex justify-content-center align-items-center">
-
-                            {
-                                currentSourceSong &&
-                                <>
-                                    <div className="d-flex flex-column align-items-center">
-                                        <img src={currentSourceSong.thumbnail_src} alt="currentSong" height={50} width={50} />
-                                        <h3>{currentSourceSong.title}</h3>
-                                        <span>{currentSourceSong.artist}</span>
-                                    </div>
-                                </>
-                            }
-
-                        </div> */}
-
                                     <div className="col-12 py-5 d-flex justify-content-center align-items-center">
 
 
