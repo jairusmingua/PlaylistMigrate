@@ -28,6 +28,8 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
         res.status(200).json(user.accounts)
     } catch (error) {
         console.log(error)
-        res.status(500).send(error)
+        res.status(500).send({
+            error: 'Failed Linking Account'
+        })
     }
 }

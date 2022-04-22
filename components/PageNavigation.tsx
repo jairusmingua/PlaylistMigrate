@@ -31,7 +31,7 @@ export default function PageNavigation({ user }: { user: User }) {
                         >
                             <Dropdown.Item href="/settings">Settings</Dropdown.Item>
                             <Dropdown.Item href="#" onClick={() => signOut({
-                                callbackUrl:'/'
+                                callbackUrl: process.env.NEXT_PUBLIC_BASE_URL
                             })}>Logout</Dropdown.Item>
                         </DropdownButton>
 

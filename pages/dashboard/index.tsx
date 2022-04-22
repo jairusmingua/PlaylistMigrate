@@ -52,7 +52,7 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
   return (
     <>
       <Head>
-        <title>PlayistMigrate | Dashboard</title>
+        <title>PlaylistMigrate | Dashboard</title>
       </Head>
       {user ? (
 

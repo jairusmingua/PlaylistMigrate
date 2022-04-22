@@ -70,3 +70,5 @@ export class Song {
     title: String;
     image: String;
 }
+
+export type CallBackStatus = 'ERROR' | 'SUCCESS'

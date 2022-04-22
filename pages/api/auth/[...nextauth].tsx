@@ -38,7 +38,7 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                     }
                 )
                 if (_account) {
-                    return '/settings?linking-success=false'
+                    return '/api/auth/callback/?status=ERROR&message=Failed to Link Account'
                 }
 
                 return true;

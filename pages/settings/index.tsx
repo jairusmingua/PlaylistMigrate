@@ -12,6 +12,7 @@ import Preference from '../../components/setting/Preference';
 import Privacy from '../../components/setting/Privacy';
 import { getUser } from "../../repositories/UserRepository";
 import Head from "next/head";
+import AlertBox from "../../components/AlertBox";
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -19,9 +20,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 export default function Settings({ user }) {
-    const { query } = useRouter()
     const [page, setPage] = useState(0);
-    const [show, setShow] = useState(query['linking-success'] ? true : false);
     return (
         <>
             <Head>
@@ -48,12 +47,7 @@ export default function Settings({ user }) {
                     </div>
 
                     <div className="col-12 col-sm-12 col-lg-8">
-                        {
-                            show &&
-                            <Alert variant={query['linking-success'] == 'true' ? 'success' : 'warning'} onClose={() => setShow(false)} dismissible>
-                                <strong>{query['linking-success'] == 'true' ? 'Great!' : 'Oh No!'}</strong> {query['linking-success'] == 'true' ? 'Account was successfully Linked.' : 'Account linking failed.'}
-                            </Alert>
-                        }
+                        <AlertBox/>
                         <div className="settingsPanel shadow-sm">
 
                             {

@@ -6,6 +6,8 @@ import Head from "next/head";
 import { FunctionComponent, useState } from "react";
 import { getUser } from "../../repositories/UserRepository";
 import { useRouter } from 'next/router'
+import { generateCallback } from "../../util";
+import AlertBox from "../../components/AlertBox";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const user = await getUser(req, res)
@@ -22,21 +24,19 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
 export default function PrimarySelect({ accounts }: { accounts: Account[] }) {
     const router = useRouter()
-    const [_accounts, set_accounts] = useState(accounts);
-    const callbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?linking-success=true`
     function handlePrimary(account) {
         axios.post('/api/set-primary', account).then((response) => {
             if (response.status == 200) {
                 router.push('/dashboard')
             }
         }).catch((error) => {
-            router.push('/dashboard')
-            console.log(error)
+            const url = generateCallback('/primary-select','ERROR', error.response.data.error)
+            document.location = url
         })
     }
     return (<>
         <Head>
-            <title>PlayistMigrate | Select Primary</title>
+            <title>PlaylistMigrate | Select Primary</title>
         </Head>
         <div className="container" style={{ height: "100vh" }}>
             <div className="d-flex flex-column align-items-center justify-content-center h-100">
@@ -47,10 +47,13 @@ export default function PrimarySelect({ accounts }: { accounts: Account[] }) {
                 <div className="row pb-3">
                     <p>In order to use PlaylistMigrate, select primary account.</p>
                 </div>
+                <div className="row pt-2 m-0">
+                    <AlertBox/>
+                </div>
                 <div className="row">
                     <div className="col-12">
                         {
-                            _accounts.map((account) =>
+                            accounts.map((account) =>
                                 <button className="card col-12 btn-dark m-2" style={{ width: "250px" }} onClick={() => { handlePrimary(account) }}>
                                     <div className="card-body d-flex flex-column align-items-center w-100">
 

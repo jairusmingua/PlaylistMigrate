@@ -2,6 +2,8 @@ import { Account } from "@prisma/client";
 import { FunctionComponent, useState, useEffect } from "react";
 import { getSession, providers, signIn, signOut, useSession } from 'next-auth/client'
 import axios from "axios";
+import { generateCallback } from "../../util";
+import { useRouter } from "next/router";
 
 interface LinkingProps {
     accounts: Array<Account>;
@@ -9,12 +11,19 @@ interface LinkingProps {
 
 const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
     const [_accounts, set_accounts] = useState(accounts);
-    function handleSignin(provider, account: Account) {
+    const router = useRouter()
+    function handleSignin(provider: string, account: Account) {
         if (!account) {
-            signIn(provider, { callbackUrl: callbackUrl })
+            signIn(provider, {
+                callbackUrl: generateCallback(
+                    '/settings',
+                    'SUCCESS',
+                    `${provider == 'spotify'?'Spotify':'Youtube Music'} was Successfully Linked`,
+                    null
+                ),
+            })
         }
     }
-    const callbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/settings?linking-success=true`
     function handleUnlinkAccount(provider) {
         const account = accounts.filter((account) => account.providerId == provider.toLowerCase())[0]
         axios.post('/api/unlink', account).then((response) => {
@@ -22,7 +31,8 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                 set_accounts(response.data)
             }
         }).catch((error) => {
-            console.log(error)
+            const url = generateCallback('/settings','ERROR', error.response.data.error)
+            document.location = url
         })
     }
     function handlePrimary(provider) {
@@ -70,12 +80,12 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                                 .length != 0 && _accounts.length > 1) &&
                             <>
                                 {
-                                    !_accounts.filter((val) => val.providerId == 'spotify')[0].primary?
-                                    <div className="d-flex">
-                                        <button className="btn btn-link" onClick={() => handleUnlinkAccount('spotify')}>Unlink</button>
-                                        <button className="btn btn-link" onClick={() => handlePrimary('spotify')} >Set As Primary</button>
-                                    </div>:
-                                    <button className="btn btn-link" disabled>Primary</button>
+                                    !_accounts.filter((val) => val.providerId == 'spotify')[0].primary ?
+                                        <div className="d-flex">
+                                            <button className="btn btn-link" onClick={() => handleUnlinkAccount('spotify')}>Unlink</button>
+                                            <button className="btn btn-link" onClick={() => handlePrimary('spotify')} >Set As Primary</button>
+                                        </div> :
+                                        <button className="btn btn-link" disabled>Primary</button>
 
                                 }
                             </>
@@ -109,12 +119,12 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                                 .length != 0 && _accounts.length > 1) &&
                             <>
                                 {
-                                    !_accounts.filter((val) => val.providerId == 'google')[0].primary?
-                                    <div className="d-flex">
-                                        <button className="btn btn-link" onClick={() => handleUnlinkAccount('google')}>Unlink</button>
-                                        <button className="btn btn-link" onClick={() => handlePrimary('google')} >Set As Primary</button>
-                                    </div>:
-                                    <button className="btn btn-link" disabled>Primary</button>
+                                    !_accounts.filter((val) => val.providerId == 'google')[0].primary ?
+                                        <div className="d-flex">
+                                            <button className="btn btn-link" onClick={() => handleUnlinkAccount('google')}>Unlink</button>
+                                            <button className="btn btn-link" onClick={() => handlePrimary('google')} >Set As Primary</button>
+                                        </div> :
+                                        <button className="btn btn-link" disabled>Primary</button>
 
 
                                 }

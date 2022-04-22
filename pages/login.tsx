@@ -6,6 +6,7 @@ import { getSession, providers, signIn, signOut, useSession } from 'next-auth/cl
 import { useEffect } from 'react';
 import { GetServerSideProps } from "next";
 import Head from 'next/head';
+import AlertBox from '../components/AlertBox';
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
     const session = await getSession({ req });
@@ -30,7 +31,10 @@ export default function Login({ props }) {
                     <Card className="text-center p-4">
                         <Card.Body className="pb-5">
                             <Col className="d-flex flex-column pb-5 pt-4 w-100">
-                                <img src="logo.svg" className="dark" height="40px" />
+                                <a href="/">
+
+                                    <img src="logo.svg" className="dark" height="40px" />
+                                </a>
                             </Col>
                             <Col className="p-0 gap-2">
 
@@ -61,6 +65,7 @@ export default function Login({ props }) {
 
                             </Col>
                         </Card.Body>
+                        <AlertBox />
                     </Card>
                 </Container>
                 <style jsx global>{

@@ -3,8 +3,11 @@ import axios from "axios";
 import { GetServerSideProps } from "next";
 import { signIn, signOut } from "next-auth/client";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { FunctionComponent, useState } from "react";
+import AlertBox from "../../components/AlertBox";
 import { getUser } from "../../repositories/UserRepository";
+import { generateCallback } from "../../util";
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -21,26 +24,24 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 export default function Onboard({ accounts }: { accounts: Account[] }) {
+    const { query } = useRouter()
+    const { status } = query
+    const { message } = query
+    const show = message ? true : false
+
     const [_accounts, set_accounts] = useState(accounts);
     function handleSignin(provider, account: Account) {
         if (!account) {
-            signIn(provider, { callbackUrl: callbackUrl })
+            signIn(provider, {
+                callbackUrl: generateCallback(
+                    '/onboard'
+                )
+            })
         }
-    }
-    const callbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?linking-success=true`
-    function handleUnlinkAccount(provider) {
-        const account = accounts.filter((account) => account.providerId == provider.toLowerCase())[0]
-        axios.post('/api/unlink', account).then((response) => {
-            if (response.status == 200) {
-                set_accounts(response.data)
-            }
-        }).catch((error) => {
-            console.log(error)
-        })
     }
     return (<>
         <Head>
-            <title>PlayistMigrate | Onboarding</title>
+            <title>PlaylistMigrate | Onboarding</title>
         </Head>
         <div className="container" style={{ height: "100vh" }}>
             <div className="d-flex flex-column align-items-center justify-content-center h-100">
@@ -50,6 +51,10 @@ export default function Onboard({ accounts }: { accounts: Account[] }) {
                 </div>
                 <div className="row pb-3">
                     <p>In order to use PlaylistMigrate, link two or more accounts.</p>
+                </div>
+                <div className="row pt-2 m-0">
+
+                    <AlertBox />
                 </div>
                 <div className="row">
                     <div className="col py-2 text-center">
@@ -74,21 +79,6 @@ export default function Onboard({ accounts }: { accounts: Account[] }) {
                                 }
                             </div>
                         </button>
-
-                        {
-                            (_accounts.filter((val) => val.providerId == 'spotify')
-                                .length != 0 && _accounts.length > 1) &&
-                            <>
-                                {
-                                    !_accounts.filter((val) => val.providerId == 'spotify')[0].primary ?
-                                        <button className="btn btn-link" onClick={() => handleUnlinkAccount('spotify')}>Unlink</button> :
-                                        <button className="btn btn-link" disabled>Set as Primary</button>
-
-                                }
-                            </>
-
-                        }
-
                     </div>
                     <div className="col py-2 text-center">
                         <button className="btn btn-dark" onClick={() => handleSignin('google', _accounts.filter(val => val.providerId == 'google')[0])}>
@@ -111,19 +101,6 @@ export default function Onboard({ accounts }: { accounts: Account[] }) {
                                 }
                             </div>
                         </button>
-                        {
-                            (_accounts.filter((val) => val.providerId == 'google')
-                                .length != 0 && _accounts.length > 1) &&
-                            <>
-                                {
-                                    !_accounts.filter((val) => val.providerId == 'google')[0].primary ?
-                                        <button className="btn btn-link" onClick={() => handleUnlinkAccount('google')}>Unlink</button> :
-                                        <button className="btn btn-link" disabled>Set as Primary</button>
-
-                                }
-                            </>
-
-                        }
                     </div>
                 </div>
                 <div className="row pt-5">
