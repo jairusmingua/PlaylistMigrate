@@ -20,6 +20,14 @@ import Linking from '../../components/setting/Linking'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const user = await getUser(req, res)
+  if (!user) {
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/login'
+      }
+    }
+  }
   if (user.accounts.length < 2) {
     return {
       redirect: {
@@ -49,7 +57,7 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
     axios.get('/api/profile').then((res) => {
       setPlaylist(res.data['playlists'])
       setLoading(false)
-    }).catch((error)=>{
+    }).catch((error) => {
       console.log(error.response)
     })
   }, []);
@@ -68,7 +76,7 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
               <DropdownButton
                 title={
                   <>
-                    <img className="p-1" src={`/${currentAccount.providerId == 'spotify'?'spotify':'youtube'}.png`} height="30px" width="30px" />
+                    <img className="p-1" src={`/${currentAccount.providerId == 'spotify' ? 'spotify' : 'youtube'}.png`} height="30px" width="30px" />
                     {
 
                       currentAccount.providerId == 'google' ? 'Youtube Music' : 'Spotify'

@@ -11,7 +11,15 @@ import AlertBox from "../../components/AlertBox";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const user = await getUser(req, res)
-    if (user.accounts.filter((account) => account.primary == true).length != 0) {
+    if (!user){
+        return {
+            redirect: {
+                permanent: true,
+                destination: '/login'
+            }
+        }
+    }
+    if (user.accounts.filter((account) => account.primary == true)?.length != 0) {
         return {
             redirect: {
                 permanent: true,
@@ -19,6 +27,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
             }
         }
     }
+    
     return { props: { accounts: user.accounts } }
 };
 
@@ -30,7 +39,7 @@ export default function PrimarySelect({ accounts }: { accounts: Account[] }) {
                 router.push('/dashboard')
             }
         }).catch((error) => {
-            const url = generateCallback('/primary-select','ERROR', error.response.data.error)
+            const url = generateCallback('/primary-select', 'ERROR', error.response.data.error)
             router.push(url)
         })
     }
@@ -48,7 +57,7 @@ export default function PrimarySelect({ accounts }: { accounts: Account[] }) {
                     <p>In order to use PlaylistMigrate, select primary account.</p>
                 </div>
                 <div className="row pt-2 m-0">
-                    <AlertBox/>
+                    <AlertBox />
                 </div>
                 <div className="row">
                     <div className="col-12">

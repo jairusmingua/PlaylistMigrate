@@ -10,6 +10,14 @@ const prisma = new PrismaClient()
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const user = await getUser(req, res)
+    if(!user){
+        return {
+            redirect: {
+                permanent: true,
+                destination: '/login'
+            }
+        }
+    }
     const account = await prisma.account.update({
         where: {
             id: user.accounts[0].id

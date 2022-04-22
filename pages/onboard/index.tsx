@@ -12,6 +12,14 @@ import { generateCallback } from "../../util";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const user = await getUser(req, res)
+    if (!user) {
+        return {
+            redirect: {
+                permanent: true,
+                destination: '/login'
+            }
+        }
+    }
     if (user.accounts.length >= 2) {
         return {
             redirect: {

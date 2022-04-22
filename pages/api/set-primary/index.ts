@@ -11,7 +11,6 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
     const session = await getSession({ req: _ })
     const account = _.body
     try {
-        throw 'Error'
         const user = await prisma.user.findUnique({
             where: {
                 email: session.user.email,

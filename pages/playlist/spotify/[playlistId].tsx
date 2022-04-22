@@ -16,6 +16,14 @@ import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
   const user = await getUser(req, res)
+  if (!user) {
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/login'
+      }
+    }
+  }
   const spotifyCredentials = getOauthAccount(user.accounts, 'Spotify')
   const youtubeCredentials = getOauthAccount(user.accounts, 'Google')
   return { props: { user: user, spotifyCredentials, youtubeCredentials } }
@@ -91,7 +99,7 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
   return (
     <>
       <Head>
-        <title>PlaylistMigrate {playlist?.name ? `| ${playlist?.name}`: ''}</title>
+        <title>PlaylistMigrate {playlist?.name ? `| ${playlist?.name}` : ''}</title>
       </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
         <a className="btn-outline-light" href="/dashboard">
