@@ -9,7 +9,7 @@ export async function getUser(req: IncomingMessage, res: ServerResponse){
     if (!session) {
         res.statusCode = 302
         res.setHeader('Location', `/login`)
-        return null
+        
     }
     return await prisma.user.findUnique({
         where: {
