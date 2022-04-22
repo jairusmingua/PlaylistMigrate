@@ -31,7 +31,7 @@ export default function PrimarySelect({ accounts }: { accounts: Account[] }) {
             }
         }).catch((error) => {
             const url = generateCallback('/primary-select','ERROR', error.response.data.error)
-            document.location = url
+            router.push(url)
         })
     }
     return (<>

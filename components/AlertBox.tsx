@@ -5,8 +5,9 @@ import { Alert } from "react-bootstrap";
 const AlertBox: FunctionComponent = () => {
     const { query } = useRouter()
     const { status } = query
-    const { message } = query
-    const [show, setShow] = useState(message ? true : false);
+    let { message } = query
+    const [show, setShow] = useState(message != null ? true : false);
+    message = message == 'null'? 'Something Wen\'t Wrong' : message
     return (
         <>
             {

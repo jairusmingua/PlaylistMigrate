@@ -11,6 +11,7 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
     const session = await getSession({ req: _ })
     const account = _.body
     try {
+        throw 'Error'
         const user = await prisma.user.findUnique({
             where: {
                 email: session.user.email,
@@ -52,6 +53,8 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
         res.status(200).send(_user.accounts)
     } catch (error) {
         console.log(error)
-        res.status(500).send(error)
+        res.status(500).send({
+            error:'Cannot set primary.'
+        })
     }
 }

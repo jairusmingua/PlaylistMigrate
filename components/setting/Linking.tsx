@@ -32,7 +32,7 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
             }
         }).catch((error) => {
             const url = generateCallback('/settings','ERROR', error.response.data.error)
-            document.location = url
+            router.push(url)
         })
     }
     function handlePrimary(provider) {
