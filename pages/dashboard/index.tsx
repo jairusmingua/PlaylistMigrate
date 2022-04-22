@@ -20,7 +20,6 @@ import Linking from '../../components/setting/Linking'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const user = await getUser(req, res)
-  console.log(user.accounts.length)
   if (user.accounts.length < 2) {
     return {
       redirect: {

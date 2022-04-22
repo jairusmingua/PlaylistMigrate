@@ -4,6 +4,7 @@ import { getSession, GetSessionOptions } from 'next-auth/client';
 import { prisma } from '../../../db/prisma';
 import { getOauthAccount } from '../../../repositories/UserRepository';
 import spotify from '../../../services/Spotify'
+import PrimarySelect from '../../primary-select';
 
 export default async (_: NextApiRequest, res: NextApiResponse) => {
     const prefix = 'api/set-primary'
@@ -19,8 +20,13 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
             }
         })
         if (user.accounts.filter((account) => account.primary == true).length != 0) {
-            res.status(500).send({
-                message: 'Primary Exists'
+            await prisma.account.update({
+                where: {
+                    id: user.accounts.filter((account) => account.primary == true)[0].id
+                },
+                data: {
+                    primary: false
+                }
             })
         }
         const _account = await prisma.account.update({
@@ -31,17 +37,19 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
                 primary: true
             }
         })
-        const _user = await prisma.user.update({
-            where:{
+        let _user = await prisma.user.update({
+            where: {
                 id: user.id
             },
-            data:{
+            include: {
+                accounts: true
+            },
+            data: {
                 id: _account.providerAccountId
             }
         })
-        res.status(200).send({
-            message: 'Primary Successfully Set'
-        })
+
+        res.status(200).send(_user.accounts)
     } catch (error) {
         console.log(error)
         res.status(500).send(error)
