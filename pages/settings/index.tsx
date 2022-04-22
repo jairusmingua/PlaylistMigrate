@@ -22,7 +22,6 @@ export default function Settings({ user }) {
     const { query } = useRouter()
     const [page, setPage] = useState(0);
     const [show, setShow] = useState(query['linking-success'] ? true : false);
-
     return (
         <>
             <Head>

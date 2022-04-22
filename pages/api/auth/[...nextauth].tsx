@@ -33,11 +33,10 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                 const _account: Account = await prisma.account.findFirst(
                     {
                         where: {
-                            userId: account.id
+                            providerAccountId: account.id
                         }
                     }
                 )
-
                 if (_account) {
                     return '/settings?linking-success=false'
                 }
@@ -45,25 +44,22 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                 return true;
             },
             async session(session, user) {
-                console.log(session);
-                console.log(user);
-                const {accounts} = await prisma.user.findUnique({
-                    where:{
+                const { accounts } = await prisma.user.findUnique({
+                    where: {
                         email: user.email
                     },
-                    include:{
+                    include: {
                         accounts: true
                     }
                 })
-                
-                accounts.map((account)=>{
-                    const difference = (Date.now() - account.updatedAt.getTime())/1000
-                    if(difference > 3200){
-                        if(account.providerId == 'spotify'){
+                accounts.map((account) => {
+                    const difference = (Date.now() - account.updatedAt.getTime()) / 1000
+                    if (difference > 3200) {
+                        if (account.providerId == 'spotify') {
                             const spotifyService = new Spotify()
                             spotifyService.refreshToken(account)
                         }
-                        if(account.providerId == 'google'){
+                        if (account.providerId == 'google') {
                             const youtubeService = new Youtube()
                             youtubeService.refreshToken(account)
                         }
@@ -78,7 +74,8 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
             secret: process.env.JWT_SECRET
         },
         pages: {
-            signIn: '/login',
+            signIn: '/login', 
+            newUser: '/auth/new-user' 
         },
         adapter: PrismaAdapter(prisma)
 
