@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { AppProps } from 'next/app';
-import { Playlist, PrismaClient, User } from "@prisma/client"
+import { Playlist, PrismaClient, User, Account } from "@prisma/client"
 import { GetServerSideProps } from "next";
 import { IncomingMessage, ServerResponse } from 'http'
 import { prisma } from '../../db/prisma'
@@ -16,14 +16,34 @@ import { SpotifyPlaylist } from '../../services/types'
 import PlaylistItem from '../../components/PlaylistItem'
 import { spotifyQueue } from '../../queue'
 import { getUser } from '../../repositories/UserRepository'
+import Linking from '../../components/setting/Linking'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  return { props: { user:  await getUser(req, res) } }
+  const user = await getUser(req, res)
+  console.log(user.accounts.length)
+  if (user.accounts.length < 2) {
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/onboard'
+      }
+    }
+  }
+  if (user.accounts.filter((account)=>account.primary == true).length == 0) {
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/primary-select'
+      }
+    }
+  }
+  return { props: { user: await getUser(req, res) } }
 };
 
-export default function Dashboard({ user }: { user: User }) {
+export default function Dashboard({ user }: { user: User & { accounts: Account[] } }) {
   const [playlist, setPlaylist] = useState([])
   const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     axios.get('/api/profile').then((res) => {
       setPlaylist(res.data['playlists'])
@@ -36,6 +56,7 @@ export default function Dashboard({ user }: { user: User }) {
         <title>PlayistMigrate | Dashboard</title>
       </Head>
       {user ? (
+
         <div className="container">
           <PageNavigation user={user}></PageNavigation>
           {loading ? (
@@ -58,6 +79,7 @@ export default function Dashboard({ user }: { user: User }) {
           )}
 
         </div>
+
 
       ) : (<></>)}
       <style jsx>
