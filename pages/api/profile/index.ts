@@ -24,7 +24,7 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
             return res.status(200).json(user)
         }
         const playlist = await spotify.getPlaylists(spotifyCredentials);
-        if (playlist.length > user.playlists.length) {
+        if (playlist.length > user.playlists.filter((playlist) => playlist.platform == 'SPOTIFY').length) {
             playlist.map((item) => {
                 prisma.playlist.upsert({
                     update: {
@@ -45,9 +45,8 @@ export default async (_: NextApiRequest, res: NextApiResponse) => {
         if (!playlist) {
             throw "Playlist Error"
         }
-        res.status(200).json(user)
+        return res.status(200).json(user)
     } catch (error) {
-        console.log(error)
-        res.status(500).send(error)
+        return res.status(500).send(error)
     }
 }

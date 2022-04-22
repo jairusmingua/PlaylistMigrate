@@ -41,10 +41,6 @@ export class Spotify {
     }
     async getPlaylists(account: Account): Promise<Array<Playlist>> {
         try {
-            if (secondDifference(account.updatedAt) > 3600) {
-                account = await this.refreshToken(account)
-            }
-            
             const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
             const response = await fetch(url, {
                 method: 'GET',
@@ -77,7 +73,8 @@ export class Spotify {
             return playlist
 
         } catch (error) {
-            throw error;
+            console.log(error)
+            return error;
         }
     }
     async getPlaylistSongs(playlistId, account: Account) {

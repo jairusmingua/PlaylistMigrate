@@ -9,7 +9,7 @@ import { Playlist, PrismaClient, User, Account } from "@prisma/client"
 import { GetServerSideProps } from "next";
 import { IncomingMessage, ServerResponse } from 'http'
 import { prisma } from '../../db/prisma'
-import { Navbar, Image, Container, Col, Row, Spinner } from 'react-bootstrap'
+import { Navbar, Image, Container, Col, Row, Spinner, DropdownButton, Dropdown, InputGroup } from 'react-bootstrap'
 import PageNavigation from '../../components/PageNavigation'
 import axios from 'axios'
 import { SpotifyPlaylist } from '../../services/types'
@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       }
     }
   }
-  if (user.accounts.filter((account)=>account.primary == true).length == 0) {
+  if (user.accounts.filter((account) => account.primary == true).length == 0) {
     return {
       redirect: {
         permanent: true,
@@ -36,17 +36,21 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       }
     }
   }
-  return { props: { user: await getUser(req, res) } }
+  return { props: { user } }
 };
 
 export default function Dashboard({ user }: { user: User & { accounts: Account[] } }) {
   const [playlist, setPlaylist] = useState([])
   const [loading, setLoading] = useState(true)
-
+  let accounts = user.accounts
+  let primaryAccount = user.accounts.filter((account) => account.primary == true)[0]
+  const [currentAccount, setCurrentAccount] = useState(primaryAccount);
   useEffect(() => {
     axios.get('/api/profile').then((res) => {
       setPlaylist(res.data['playlists'])
       setLoading(false)
+    }).catch((error)=>{
+      console.log(error.response)
     })
   }, []);
   return (
@@ -58,6 +62,43 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
 
         <div className="container">
           <PageNavigation user={user}></PageNavigation>
+          <div className="row px-3 pb-5">
+            <div className="d-flex">
+
+              <DropdownButton
+                title={
+                  <>
+                    <img className="p-1" src={`/${currentAccount.providerId == 'spotify'?'spotify':'youtube'}.png`} height="30px" width="30px" />
+                    {
+
+                      currentAccount.providerId == 'google' ? 'Youtube Music' : 'Spotify'
+                    }
+
+                  </>
+                }
+                variant="secondary"
+                id="input-group-dropdown-1"
+                menuAlign="left"
+              >
+                {
+                  accounts.filter((account) => account.primary == true).map((account) =>
+                    <>
+                      <Dropdown.Item onClick={() => setCurrentAccount(account)} active={account.providerId == currentAccount.providerId}>{account.providerId == 'google' ? 'Youtube Music' : 'Spotify'}</Dropdown.Item>
+                    </>)
+
+                }
+                {
+                  accounts.filter((account) => account.primary != true).map((account) =>
+                    <>
+                      <Dropdown.Item onClick={() => setCurrentAccount(account)} active={account.providerId == currentAccount.providerId}>{account.providerId == 'google' ? 'Youtube Music' : 'Spotify'}</Dropdown.Item>
+                    </>
+                  )
+                }
+              </DropdownButton>
+
+
+            </div>
+          </div>
           {loading ? (
             <>
               <div className="d-flex justify-content-center align-items-center loading">
