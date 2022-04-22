@@ -18,7 +18,8 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
     const [foundSongs, setFoundSongs] = useState([]);
     const [showReport, setShowReport] = useState(false);
     async function youtubeInsert(playlistId, songs, index) {
-        if (index < length) {
+        console.log(index)
+        if (index < songs.length) {
             let payload = {
                 "snippet": {
                     "playlistId": playlistId,
@@ -42,18 +43,19 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                 return false
             }
             let _index = index + 1
-            youtubeInsert(playlistId, songs, _index)
+            return await youtubeInsert(playlistId, songs, _index)
         }
         return true
 
     }
     async function insertPlaylist(playlistId, foundSongs) {
         console.log('insertPlaylist')
+        console.log(source, destination)
         if (source == 'SPOTIFY' && destination == 'YT') {
             console.log(`Inserting ${playlistId}`)
             try {
-                youtubeInsert(playlistId, foundSongs, 0)
-
+                return await youtubeInsert(playlistId, foundSongs, 0)
+                
             } catch (error) {
                 console.log(error);
 

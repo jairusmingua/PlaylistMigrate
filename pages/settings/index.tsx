@@ -16,7 +16,16 @@ import AlertBox from "../../components/AlertBox";
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-    return { props: { user: await getUser(req, res) } }
+    const user = await getUser(req, res)
+    if (!user) {
+        return {
+            redirect: {
+                permanent: true,
+                destination: '/login'
+            }
+        }
+    }
+    return { props: { user: user} }
 };
 
 export default function Settings({ user }) {
@@ -47,7 +56,7 @@ export default function Settings({ user }) {
                     </div>
 
                     <div className="col-12 col-sm-12 col-lg-8">
-                        <AlertBox/>
+                        <AlertBox />
                         <div className="settingsPanel shadow-sm">
 
                             {
