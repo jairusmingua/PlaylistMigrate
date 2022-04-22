@@ -54,7 +54,7 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                 })
                 accounts.map((account) => {
                     const difference = (Date.now() - account.updatedAt.getTime()) / 1000
-                    if (difference > 3200) {
+                    if (difference > 1000) {
                         if (account.providerId == 'spotify') {
                             const spotifyService = new Spotify()
                             spotifyService.refreshToken(account)
