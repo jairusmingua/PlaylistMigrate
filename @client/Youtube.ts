@@ -31,7 +31,7 @@ export class Youtube extends Service {
             return null
         }
     }
-    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<Song[]> {
+    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{songs: Song[], totalSongs: number}> {
         try {
             let params = new URLSearchParams({
                 part: 'snippet',
@@ -55,9 +55,15 @@ export class Youtube extends Service {
                     imageSrc: item.snippet.thumbnails['default'].url
                 })
             })
-            return songs
+            return {
+                songs: songs,
+                totalSongs: response.data.pageInfo.totalResults
+            }
         } catch (error) {
-            return []
+            return {
+                songs: [],
+                totalSongs: 0
+            }
         }
     }
     async createPlaylist(account: Account, playlistName: string, privacy: privacy): Promise<Playlist> {
@@ -96,6 +102,9 @@ export class Youtube extends Service {
     }
     async insertItemsToPlaylist(account: Account, playlistId: string, song: SongAPIResult[], privacy: privacy = 'private', position: number = 0): Promise<boolean> {
         try {
+            if (!(position < song.length)) {
+                return true
+            }
             let payload = {
                 'snippet': {
                     'playlistId': playlistId,
@@ -111,7 +120,7 @@ export class Youtube extends Service {
             if (response.status != 200) {
                 throw response.data
             }
-            return true
+            return await this.insertItemsToPlaylist(account, playlistId, song, privacy, position + 1)
         } catch (error) {
             console.log(error)
             return false

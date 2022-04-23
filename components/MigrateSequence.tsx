@@ -1,29 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Navbar, Container, Button, Spinner } from 'react-bootstrap';
-
+import { Account } from '@prisma/client';
 import axios from 'axios'
 import Head from 'next/head';
+import { services } from '../@client';
+import { Song, SongAPIResult } from '../@client/types';
 
 let isContinue = true
-let mfoundSongs = []
+let mfoundSongs: SongAPIResult[] = []
 
-function MigrateSequence({ 
-    source, destination, playlistName, 
-    playlistId, start, 
-    onStart, onCancel, onFinish, 
-    sourceCredentials, 
-    destinationCredentials, 
-    playlistThumbnail 
+function MigrateSequence({
+    source, destination, playlistName,
+    playlistId, start,
+    onStart, onCancel, onFinish,
+    sourceCredentials,
+    destinationCredentials,
+    playlistThumbnail
 }) {
     const [songs, setSongs] = useState(undefined);
-    const [currentSourceSong, setCurrentSourceSong] = useState(undefined);
-    const [currentDestinationSong, setCurrentDestinationSong] = useState(null);
+    // const [currentSourceSong, setCurrentSourceSong] = useState(undefined);
+    const [currentDestinationSong, setCurrentDestinationSong] = useState<Song>(null);
     const [currentIndex, setCurrentIndex] = useState(undefined);
     const [loading, setLoading] = useState(true);
     const [playlistSize, setPlaylistSize] = useState(null);
     const [statusMsg, setStatusMsg] = useState(null);
-    const [notFoundSongs, setNotFoundSongs] = useState([]);
-    const [foundSongs, setFoundSongs] = useState([]);
+    const [notFoundSongs, setNotFoundSongs] = useState<Song[]>([]);
+    const [foundSongs, setFoundSongs] = useState<SongAPIResult[]>([]);
     const [showReport, setShowReport] = useState(false);
     const [_isContinue, setIsContinue] = useState(true);
     const [isDone, setIsDone] = useState(false);
@@ -69,62 +71,34 @@ function MigrateSequence({
 
     }
     async function insertPlaylist(playlistId) {
-        if (source == 'SPOTIFY' && destination == 'YT') {
-            try {
-                if (!isContinue) {
-                    return false;
-                }
-                return await youtubeInsert(playlistId, mfoundSongs, 0)
 
-            } catch (error) {
-                console.log(error);
-                return false
+        try {
+            if (!isContinue) {
+                return false;
             }
-
+            const service = services[destinationCredentials.providerId]
+            return await service.insertItemsToPlaylist(destinationCredentials, playlistId, mfoundSongs, 'private', 0)
+        } catch (error) {
+            console.log(error);
+            return false
         }
+
+
 
     }
     async function createPlaylist() {
-        if (!isContinue) {
-            return false;
-        }
-        if (source == 'SPOTIFY' && destination == 'YT') {
-            const payload = {
-                "snippet": {
-                    "title": playlistName,
-                    "description": `This is migrated playlist from ${source}`,
-                    "tags": [
-                        "playlistmigrate",
-                        playlistName
-                    ],
-                    "defaultLanguage": "en"
-                },
-                "status": {
-                    "privacyStatus": "private"
-                }
+        try {
+            if (!isContinue) {
+                return null;
             }
-
-            try {
-                if (!isContinue) {
-                    return false;
-                }
-                let { data } = await axios.post(`https://youtube.googleapis.com/youtube/v3/playlists?part=snippet%2Cstatus`, payload, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${destinationCredentials.accessToken}`
-                    }
-                })
-                return data.id
-
-            } catch (error) {
-                console.log(error)
-                return false
-            }
+            return await services[destinationCredentials.providerId]
+                .createPlaylist(destinationCredentials, playlistName, 'private')
+        } catch (error) {
+            return null
         }
 
     }
-    async function searchSong(songs, i) {
+    async function searchSong(songs: Song[], i) {
         if (!isContinue) {
             return false;
         }
@@ -132,35 +106,15 @@ function MigrateSequence({
             return true
         }
         setCurrentIndex(i)
-        const title = source == 'SPOTIFY' ? songs[i]['track']['name'] : ''
-        const artist = source == 'SPOTIFY' ? songs[i]['track']['artists'][0]['name'] : ''
-        const thumbnail_src = source == 'SPOTIFY' ? songs[i]['track']['album']['images'][0]['url'] : ''
-        const _source = source == 'SPOTIFY' ? 'SPOTIFY' : ''
-        const url = source == 'SPOTIFY' ? songs[i]['track']['external_urls']['spotify'] : ''
-        const isrc = source == 'SPOTIFY' ? songs[i]['track']['external_ids']['isrc'] : ''
-        setCurrentDestinationSong({
-            'title': title,
-            'artist': artist,
-            'thumbnail_src': thumbnail_src,
-            'source': _source,
-            'url': url,
-            'isrc': isrc
-        })
+        setCurrentDestinationSong(songs[i])
         try {
-            let { data } = await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${artist}&title=${title}&source=${_source}&isrc=${isrc}`)
-            let result = await data.result
+            let { data } = await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${songs[i].artists[0].name}&title=${songs[i].name}&source=${source}&isrc=${songs[i].isrc}`)
+            let result: SongAPIResult = await data.result
             mfoundSongs.push(result)
-            setFoundSongs((foundSongs)=>[...foundSongs, result])
+            setFoundSongs((foundSongs) => [...foundSongs, result])
             return await searchSong(songs, i + 1)
         } catch (error) {
-            setNotFoundSongs((notFoundSongs)=>[...notFoundSongs, {
-                'title': title,
-                'artist': artist,
-                'thumbnail_src': thumbnail_src,
-                'source': _source,
-                'url': url,
-                'isrc': isrc
-            }])
+            setNotFoundSongs((notFoundSongs) => [...notFoundSongs, songs[i]])
             return await searchSong(songs, i + 1)
 
         }
@@ -168,33 +122,26 @@ function MigrateSequence({
     }
     async function collectSongs() {
         setLoading(false)
-        if (source == 'SPOTIFY') {
+        try {
             if (!isContinue) {
                 return false;
             }
-            let { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-                headers: {
-                    'Authorization': `Bearer ${sourceCredentials.accessToken}`,
-                    'Accept': 'application/json'
-                }
-            })
-            let songs = data.items
-            setPlaylistSize(data.total)
+            const { songs, totalSongs } = await services[sourceCredentials.providerId].getPlaylistSongs(sourceCredentials, playlistId)
+            setPlaylistSize(totalSongs)
             return await searchSong(songs, 0)
+        } catch (error) {
+            return false
         }
-        if (!isContinue) {
-            return false;
-        }
-        return false
+
     }
     async function startMigrate() {
         setStatusMsg('Collecting Songs from Database...')
-        collectSongs().then(()=>{
+        collectSongs().then(() => {
             setStatusMsg('Creating Playlist...')
-            createPlaylist().then((playlistId)=>{            
+            createPlaylist().then((playlist) => {
                 setStatusMsg('Inserting Items to Playlist...')
-                insertPlaylist(playlistId).then((result)=>{
-                    if(result){
+                insertPlaylist(playlist.id).then((result) => {
+                    if (result) {
                         setIsDone(true)
                     }
                 })
@@ -255,9 +202,9 @@ function MigrateSequence({
                                             currentDestinationSong &&
                                             <>
                                                 <div className="d-flex flex-column align-items-center">
-                                                    <img className="pb-2" src={currentDestinationSong.thumbnail_src} alt="currentSong" style={{ aspectRatio: "1", width: "50vw", maxWidth: "200px" }} />
-                                                    <h3 className="text-center">{currentDestinationSong.title}</h3>
-                                                    <span>{currentDestinationSong.artist}</span>
+                                                    <img className="pb-2" src={currentDestinationSong.imageSrc} alt="currentSong" style={{ aspectRatio: "1", width: "50vw", maxWidth: "200px" }} />
+                                                    <h3 className="text-center">{currentDestinationSong.name}</h3>
+                                                    <span>{currentDestinationSong.artists[0].name}</span>
                                                 </div>
                                             </>
                                         }
@@ -294,11 +241,11 @@ function MigrateSequence({
                                                 notFoundSongs.map((song, i) =>
                                                     <li key={i} style={{ listStyle: 'none', backgroundColor: 'black' }} className="playlistSongItem mb-3 p-3">
                                                         <div className="d-flex gap-3">
-                                                            <img className="mx-3" height={50} width={50} src={song.thumbnail_src} alt={song.title} />
+                                                            <img className="mx-3" height={50} width={50} src={song.imageSrc} alt={song.name} />
                                                             <div className="d-flex flex-column">
-                                                                <h4>{song.title}</h4>
+                                                                <h4>{song.name}</h4>
                                                                 <span>
-                                                                    {song.artist}
+                                                                    {song.artists[0].name}
                                                                 </span>
                                                             </div>
                                                         </div>

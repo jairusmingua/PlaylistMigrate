@@ -13,7 +13,8 @@ export interface Song {
     id: string,
     name: string,
     artists: Artist[],
-    imageSrc: string
+    imageSrc: string,
+    isrc?: string
 }
 export interface Artist {
     name: string
@@ -31,9 +32,12 @@ export interface ServiceConfig{
     allowsBulk: boolean
 }
 export abstract class Service {
-    constructor({allowsBulk}: ServiceConfig) { }
+    public allowsBulk
+    constructor({allowsBulk}: ServiceConfig) { 
+        this.allowsBulk = allowsBulk
+    }
     abstract getPlaylist(account: Account, playlistId: string | string[]): Promise<Playlist>
-    abstract getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<Song[]>
+    abstract getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{songs: Song[], totalSongs: number}>
     abstract createPlaylist(account: Account, playlistName: string, privacy: privacy): Promise<Playlist>
     abstract insertItemsToPlaylist(account: Account, playlistId: string, song: SongAPIResult[], privacy: privacy, position: number): Promise<boolean>
     abstract config(account: Account): any

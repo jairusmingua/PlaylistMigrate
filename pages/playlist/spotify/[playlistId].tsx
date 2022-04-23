@@ -82,7 +82,7 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
   useEffect(() => {
     if (playlistId != undefined) {
       services[currentCredentials.providerId].getPlaylistSongs(currentCredentials, playlistId)
-      .then((songs)=>{
+      .then(({songs, totalSongs})=>{
         setSongs(songs)
         services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
         .then((playlist)=>{

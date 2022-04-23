@@ -25,7 +25,7 @@ export class Spotify extends Service {
             return null
         }
     }
-    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<Song[]> {
+    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{songs: Song[], totalSongs: number}> {
         try {
             let response = await axios.get(`${this.baseUrl}/playlists/${playlistId}/tracks`,
                 this.config(account))
@@ -40,12 +40,19 @@ export class Spotify extends Service {
                     id: item.track.id,
                     name: item.track.name,
                     artists: artist,
-                    imageSrc: item.track.album.images[0].url
+                    imageSrc: item.track.album.images[0].url,
+                    isrc: item.track.external_ids.isrc
                 })
             })
-            return songs
+            return {
+                songs: songs,
+                totalSongs: response.data.total
+            }
         } catch (error) {
-            return []
+            return {
+                songs: [],
+                totalSongs: 0
+            }
         }
     }
     async createPlaylist(account: Account, playlistName: string, privacy: privacy): Promise<Playlist> {
