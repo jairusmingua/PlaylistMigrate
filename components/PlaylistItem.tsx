@@ -1,13 +1,13 @@
 import { Row, Col, Container, Media, Card } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Playlist } from '@prisma/client';
+import { Account, Playlist } from '@prisma/client';
 
-export default function PlaylistItem({ item }: { item: Playlist }) {
+export default function PlaylistItem({ item, account }: { item: Playlist, account: Account }) {
 
     return (
         <>
-            <Link href={`/playlist/spotify/${item.external_id}`}>
+            <Link href={`/playlist/${account.providerId}/${item.external_id}`}>
                 <div className="playlistCard" style={{ backgroundColor: "black", borderRadius: "20px", padding: "20px" }}>
                     <div className="d-flex flex-column">
                         <img src={item.image} key={item.id} style={{ borderRadius: "20px", padding: "2%", width: "100%", aspectRatio: "1" }} />

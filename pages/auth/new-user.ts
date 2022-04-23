@@ -4,7 +4,7 @@ import { getUser } from '../../repositories/UserRepository'
 import { prisma } from '../../db/prisma'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-    const user = await getUser(req, res)
+    const user = await getUser({req: req})
     if (!user) {
         return {
             redirect: {

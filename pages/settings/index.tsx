@@ -13,7 +13,7 @@ import AlertBox from "../../components/AlertBox";
 
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-    const user = await getUser(req, res)
+    const user = await getUser({req: req})
     if (!user) {
         return {
             redirect: {

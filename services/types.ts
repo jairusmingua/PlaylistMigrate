@@ -46,5 +46,5 @@ export type CallBackStatus = 'ERROR' | 'SUCCESS'
 export abstract class Service {
     constructor() { }
     abstract refreshToken(account: Account): Promise<Account>
-    abstract getPlaylists(account: Account): Promise<Playlist[] | any>
+    abstract getPlaylists(account: Account)
 }

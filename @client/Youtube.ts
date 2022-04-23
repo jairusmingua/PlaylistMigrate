@@ -1,11 +1,11 @@
 import { Artist, Playlist, privacy, Service, Song, SongAPIResult } from "./types";
 
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 import { Account } from "@prisma/client";
 
 export class Youtube extends Service {
-    baseUrl = 'https://youtube.googleapis.com/youtube/v3'
+    baseUrl = 'https://www.googleapis.com/youtube/v3'
     constructor() { super({ allowsBulk: false }) }
     async getPlaylist(account: Account, playlistId: string | string[]): Promise<Playlist> {
         try {
@@ -31,7 +31,7 @@ export class Youtube extends Service {
             return null
         }
     }
-    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{songs: Song[], totalSongs: number}> {
+    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{ songs: Song[], totalSongs: number }> {
         try {
             let params = new URLSearchParams({
                 part: 'snippet',
@@ -126,7 +126,7 @@ export class Youtube extends Service {
             return false
         }
     }
-    config(account: Account) {
+    config(account: Account): AxiosRequestConfig {
         return {
             headers: {
                 'Accept': 'application/json',

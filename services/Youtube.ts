@@ -61,48 +61,42 @@ export class Youtube extends Service {
         }
 
     }
-    async getPlaylists(account: Account): Promise<Playlist[] | any> {
-        try {
-            const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${account.accessToken}`,
-                    "Accept": "application/json",
-                }
-            });
-            if (response.status == 401) {
-                throw response.json()
+    async getPlaylists(account: Account) {
+        const params = new URLSearchParams({
+            part: 'snippet',
+            maxResults: '25',
+            mine: 'true'
+        })
+        const url = `${process.env.YOUTUBE_BASE_URL}/playlists?${params}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${account.accessToken}`,
+                "Accept": "application/json",
             }
-            const data = await response.json();
-            const playlist: Array<Playlist> = []
-            Array.from(data.items).map((item) => {
-                let i = new YoutubePlaylist(item)
-                playlist.push({
-                    title: i.name,
-                    image: i.image['url'],
-                    userId: account.userId,
-                    id: cuid(),
-                    description: i.description,
-                    platform: 'SPOTIFY',
-                    url: '',
-                    external_id: i.id,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-
-                })
-            })
-            return playlist
-
-        } catch (error) {
-            throw error;
+        });
+        if (response.status == 401) {
+            throw response.json()
         }
+        const data = await response.json();        
+        const items: [] = data.items
+        const playlist: Playlist[] = items.map((item: any) => {
+            return {
+                title: item.snippet.title,
+                image: item.snippet.thumbnails['default'].url,
+                userId: account.userId,
+                id: cuid(),
+                description: item.snippet.description,
+                platform: 'YOUTUBE',
+                url: '',
+                external_id: item.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+        })
+        return playlist
+    } catch(error) {
+        console.log(error)
+        return []
     }
 }
-
-declare const global: NodeJS.Global & { youtube: Youtube };
-
-const youtube = global.youtube || new Youtube();
-if (process.env.NODE_ENV === 'development') global.youtube = youtube;
-
-export default youtube;

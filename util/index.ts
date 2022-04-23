@@ -1,3 +1,4 @@
+import { Account } from '@prisma/client'
 import { CallBackStatus } from '../services/types'
 
 export function tokenExpiration(timestamp: Date): Number {
@@ -11,4 +12,8 @@ export function generateCallback(url: string, status: CallBackStatus = null, mes
         status: status,
         message: message
     })
+}
+
+export function getPrimaryAccount(accounts: Account[]): Account {
+    return accounts.filter((account) => account.primary == true)[0]
 }

@@ -1,30 +1,11 @@
-import { Credentials, AuthType, OAuthType, Song, Service, Profile, Playlist as P } from './types';
+import { Credentials, AuthType, OAuthType, Song, Service, Profile } from './types';
 import { Account, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
 
-class SpotifyProfile extends Profile {
-    constructor(profile: any) {
-        super();
-        this.name = profile['display_name'];
-        this.profilePic_url = profile['images'][0].url;
-    }
-}
-
-class SpotifyPlaylist extends P {
-    constructor(playlist: any) {
-        super();
-        this.name = playlist.name;
-        this.id = playlist.id;
-        this.image = playlist.images[0];
-        this.description = playlist.description
-    }
-}
 export class Spotify extends Service {
-    constructor() {
-        super()
-    }
+    constructor() { super() }
     async refreshToken(account: Account): Promise<Account> {
         try {
             const url = `https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=${account.refreshToken}`
@@ -53,53 +34,42 @@ export class Spotify extends Service {
                 }
             });
         } catch (error) {
-            throw error
+            return null
         }
 
     }
-    async getPlaylists(account: Account): Promise<Playlist[] | any> {
-        try {
-            const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${account.accessToken}`,
-                    "Accept": "application/json",
-                }
-            });
-            if (response.status == 401) {
-                throw response.json()
+    async getPlaylists(account: Account) {
+        const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${account.accessToken}`,
+                "Accept": "application/json",
             }
-            const data = await response.json();
-            const playlist: Array<Playlist> = []
-            Array.from(data.items).map((item) => {
-                let i = new SpotifyPlaylist(item)
-                playlist.push({
-                    title: i.name,
-                    image: i.image['url'],
-                    userId: account.userId,
-                    id: cuid(),
-                    description: i.description,
-                    platform: 'SPOTIFY',
-                    url: '',
-                    external_id: i.id,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-
-                })
-            })
-            return playlist
-
-        } catch (error) {
-            console.log(error)
-            return error;
+        });
+        if (response.status == 401) {
+            throw response.json()
         }
+        const data = await response.json();
+        const items: [] = data.items
+        const playlist: Playlist[] = items.map((item: any) => {
+            return {
+                title: item.name,
+                image: item.images[0].url,
+                userId: account.userId,
+                id: cuid(),
+                description: item.description,
+                platform: 'SPOTIFY',
+                url: '',
+                external_id: item.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+        })
+        return playlist
+    } catch(error) {
+        console.log(error)
+        return []
     }
+
 }
-
-declare const global: NodeJS.Global & { spotify: Spotify };
-
-const spotify = global.spotify || new Spotify();
-if (process.env.NODE_ENV === 'development') global.spotify = spotify;
-
-export default spotify;

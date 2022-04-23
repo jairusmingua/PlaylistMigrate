@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 
@@ -15,7 +14,7 @@ import { services } from '../../../@client';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
   const { service } = query
-  const user = await getUser(req, res)
+  const user = await getUser({req: req})
   if (!user) {
     return {
       redirect: {
@@ -95,6 +94,7 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
           setSongs(songs)
           services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
             .then((playlist) => {
+              console.log(playlist)
               setPlaylist(playlist)
               setLoading(false)
             })
@@ -137,7 +137,7 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
                           Migrate
                         </Button>
                       </div>
-                      <img src={playlist.imageSrc} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
+                      <img src={playlist?.imageSrc} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
 
                     </div>
 

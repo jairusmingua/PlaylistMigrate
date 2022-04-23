@@ -16,9 +16,10 @@ import PlaylistItem from '../../components/PlaylistItem'
 import { spotifyQueue } from '../../queue'
 import { getUser } from '../../repositories/UserRepository'
 import Linking from '../../components/setting/Linking'
+import { getPrimaryAccount } from '../../util'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const user = await getUser(req, res)
+  const user = await getUser({ req: req })
   if (!user) {
     return {
       redirect: {
@@ -47,19 +48,34 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 export default function Dashboard({ user }: { user: User & { accounts: Account[] } }) {
+
+  let primaryAccount = getPrimaryAccount(user.accounts)
+  let accounts = user.accounts
+
   const [playlist, setPlaylist] = useState([])
   const [loading, setLoading] = useState(true)
-  let accounts = user.accounts
-  let primaryAccount = user.accounts.filter((account) => account.primary == true)[0]
-  const [currentAccount, setCurrentAccount] = useState(primaryAccount);
+  const [currentAccount, setCurrentAccount] = useState<Account>(primaryAccount);
+
   useEffect(() => {
-    axios.get('/api/profile').then((res) => {
-      setPlaylist(res.data['playlists'])
+    setLoading(true)
+    axios.get(`/api/playlist/${currentAccount.providerId}`).then((res) => {
+      setPlaylist(res.data.items)
       setLoading(false)
     }).catch((error) => {
       console.log(error.response)
     })
   }, []);
+
+  useEffect(() => {
+    setLoading(true)
+    axios.get(`/api/playlist/${currentAccount.providerId}`).then((res) => {
+      setPlaylist(res.data.items)
+      setLoading(false)
+    }).catch((error) => {
+      console.log(error.response)
+    })
+  }, [currentAccount]);
+
   return (
     <>
       <Head>
@@ -116,7 +132,7 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
           ) : (
             <div className="container-fluid m-0 px-0 pt-0 grid" style={{ paddingBottom: "200px" }}>
               {playlist.map((item: Playlist, i) =>
-                <PlaylistItem key={i} item={item}></PlaylistItem>
+                <PlaylistItem account={currentAccount} key={i} item={item}></PlaylistItem>
               )}
             </div>
           )}

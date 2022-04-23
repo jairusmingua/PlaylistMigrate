@@ -8,16 +8,9 @@ import NextAuth from 'next-auth'
 import Providers from 'next-auth/providers'
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
-import spotify from '../../../services/Spotify'
-import youtube from '../../../services/Youtube'
-import { Service } from '../../../services/types'
 import { tokenExpiration } from '../../../util'
-
-const services : {[provider: string]: Service} = {
-    'spotify': spotify,
-    'google': youtube
-}
-
+import { services } from '../../../services'
+ 
 export default async (_: NextApiRequest, res: NextApiResponse) =>
     NextAuth(_, res, {
         providers: [
@@ -75,8 +68,8 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
             secret: process.env.JWT_SECRET
         },
         pages: {
-            signIn: '/login', 
-            newUser: '/auth/new-user' 
+            signIn: '/login',
+            newUser: '/auth/new-user'
         },
         adapter: PrismaAdapter(prisma)
 

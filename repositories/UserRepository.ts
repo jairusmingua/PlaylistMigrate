@@ -3,13 +3,14 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { prisma } from '../db/prisma'
 import { Account, User } from "@prisma/client";
 
-import { getSession } from "next-auth/client";
+import { getSession, GetSessionOptions } from "next-auth/client";
 import { OAuthProviderType } from "next-auth/providers";
 import { Source } from '../@client/types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 
-export async function getUser(req: IncomingMessage, res: ServerResponse){
-    const session = await getSession({ req: req })
+export async function getUser(options?: GetSessionOptions){
+    const session = await getSession(options)
     if (!session) {
         return null
     }
