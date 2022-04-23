@@ -6,7 +6,7 @@ import { Navbar, NavDropdown, DropdownButton, Dropdown, Nav, Image as Img } from
 export default function PageNavigation({ user }: { user: User }) {
     return (
         <>
-            <Navbar variant="dark" className="p-0">
+            <Navbar variant="dark" className="px-2 py-0">
                 <Navbar.Brand href="/dashboard" className="justify-content-between align-items-center d-flex p-0 m-0">
                     <Image
                         src="/icon.svg"

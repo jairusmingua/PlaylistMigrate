@@ -13,8 +13,8 @@ import { Account, User } from '@prisma/client';
 import { Playlist, Song } from '../../../@client/types';
 import { services } from '../../../@client';
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-
+export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+  const { service } = query
   const user = await getUser(req, res)
   if (!user) {
     return {
@@ -24,11 +24,20 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       }
     }
   }
+  const credential = getOauthAccount(user.accounts, service.toString())
+  if (!credential){
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/dashboard'
+      }
+    }
+  }
   return {
     props: {
       user: user,
       accounts: user.accounts,
-      currentCredentials: getOauthAccount(user.accounts, 'Spotify')
+      currentCredentials: credential
     }
   }
 
@@ -82,16 +91,16 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
   useEffect(() => {
     if (playlistId != undefined) {
       services[currentCredentials.providerId].getPlaylistSongs(currentCredentials, playlistId)
-      .then(({songs, totalSongs})=>{
-        setSongs(songs)
-        services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
-        .then((playlist)=>{
-          setPlaylist(playlist)
-          setLoading(false)
+        .then(({ songs, totalSongs }) => {
+          setSongs(songs)
+          services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
+            .then((playlist) => {
+              setPlaylist(playlist)
+              setLoading(false)
+            })
+        }).catch((err) => {
+          console.log(err)
         })
-      }).catch((err)=>{
-        console.log(err)
-      })
     }
   }, [playlistId]);
   return (

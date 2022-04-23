@@ -5,6 +5,7 @@ import { Account, User } from "@prisma/client";
 
 import { getSession } from "next-auth/client";
 import { OAuthProviderType } from "next-auth/providers";
+import { Source } from '../@client/types';
 
 
 export async function getUser(req: IncomingMessage, res: ServerResponse){
@@ -21,8 +22,8 @@ export async function getUser(req: IncomingMessage, res: ServerResponse){
         }
     })
 }
-export function getOauthAccount(accounts : Account[], providerType: OAuthProviderType): Account{
-    const account = accounts.filter((account)=> account.providerId == providerType.toLowerCase())
+export function getOauthAccount(accounts : Account[], providerId: Source | string): Account{
+    const account = accounts.filter((account)=> account.providerId == providerId.toLowerCase())
     if(account.length == 0){
         return null
     }

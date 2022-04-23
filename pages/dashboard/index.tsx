@@ -88,16 +88,16 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
                 menuAlign="left"
               >
                 {
-                  accounts.filter((account) => account.primary == true).map((account) =>
+                  accounts.filter((account) => account.primary == true).map((account, i) =>
                     <>
-                      <Dropdown.Item onClick={() => setCurrentAccount(account)} active={account.providerId == currentAccount.providerId}>{account.providerId == 'google' ? 'Youtube Music' : 'Spotify'}</Dropdown.Item>
+                      <Dropdown.Item key={account.providerId} onClick={() => setCurrentAccount(account)} active={account.providerId == currentAccount.providerId}>{account.providerId == 'google' ? 'Youtube Music' : 'Spotify'}</Dropdown.Item>
                     </>)
 
                 }
                 {
-                  accounts.filter((account) => account.primary != true).map((account) =>
+                  accounts.filter((account) => account.primary != true).map((account, i) =>
                     <>
-                      <Dropdown.Item onClick={() => setCurrentAccount(account)} active={account.providerId == currentAccount.providerId}>{account.providerId == 'google' ? 'Youtube Music' : 'Spotify'}</Dropdown.Item>
+                      <Dropdown.Item key={account.providerId} onClick={() => setCurrentAccount(account)} active={account.providerId == currentAccount.providerId}>{account.providerId == 'google' ? 'Youtube Music' : 'Spotify'}</Dropdown.Item>
                     </>
                   )
                 }
@@ -115,13 +115,9 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
             </>
           ) : (
             <div className="container-fluid m-0 px-0 pt-0 grid" style={{ paddingBottom: "200px" }}>
-              {playlist.map((item: Playlist) => {
-                return (
-
-                  <PlaylistItem item={item}></PlaylistItem>
-
-                )
-              })}
+              {playlist.map((item: Playlist, i) =>
+                <PlaylistItem key={i} item={item}></PlaylistItem>
+              )}
             </div>
           )}
 
