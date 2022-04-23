@@ -1,6 +1,5 @@
 import { Credentials, AuthType, OAuthType, SpotifyPlaylist, Song } from './types';
 import { Account, Playlist, User } from '@prisma/client';
-import { secondDifference } from '../util'
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
@@ -75,39 +74,6 @@ export class Spotify {
         } catch (error) {
             console.log(error)
             return error;
-        }
-    }
-    async getPlaylistSongs(playlistId, account: Account) {
-        try {
-            if (secondDifference(account.updatedAt) > 3600) {
-                account = await this.refreshToken(account)
-            }
-            const url = `${process.env.SPOTIFY_BASE_URL}/v1/playlists/${playlistId}/tracks`;
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${account.accessToken}`,
-                    "Accept": "application/json",
-                }
-            });
-            if (response.status == 401) {
-                throw response.json()
-            }
-            const data = await response.json();
-            let songs = data.items
-            songs = songs.map((song)=>{
-                const track = song.track
-                return {
-                    title: track.name,
-                    image: track.album.images[0].url,
-                    artist: track.album.artists
-                }
-            })
-
-            return songs
-        } catch (error) {
-            throw error
         }
     }
 }
