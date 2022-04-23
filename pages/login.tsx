@@ -34,10 +34,10 @@ export default function Login({ props }) {
                 <Container className="d-flex justify-content-center">
                     <Card className="text-center p-4">
                         <Card.Body className="pb-5">
-                            <Col className="d-flex flex-column pb-5 pt-4 w-100">
+                            <Col className="d-flex align-items-center flex-column pb-5 pt-4 w-100">
                                 <a href="/">
 
-                                    <img src="logo.svg" className="dark" height="40px" />
+                                    <img src="logo.svg" className="dark" height="30px" />
                                 </a>
                             </Col>
                             <Col className="p-0 gap-2">
