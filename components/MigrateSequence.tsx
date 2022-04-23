@@ -3,22 +3,29 @@ import { Navbar, Container, Button, Spinner } from 'react-bootstrap';
 import { Account } from '@prisma/client';
 import axios from 'axios'
 import Head from 'next/head';
-import { services } from '../@client';
+import { PMAPI, services } from '../@client';
 import { Song, SongAPIResult } from '../@client/types';
+import { OAuthProviderType } from 'next-auth/providers';
 
 let isContinue = true
 let mfoundSongs: SongAPIResult[] = []
+let pmapi = new PMAPI()
+interface MigrateSequenceProps {
+    playlistName: string,
+    playlistId: string,
+    onStart: VoidFunction,
+    onCancel: VoidFunction,
+    onFinish: VoidFunction,
+    sourceCredentials: Account,
+    destinationCredentials: Account,
+    playlistThumbnail: string
+}
 
 function MigrateSequence({
-    source, destination, playlistName,
-    playlistId, start,
+    playlistName, playlistId, playlistThumbnail,
     onStart, onCancel, onFinish,
-    sourceCredentials,
-    destinationCredentials,
-    playlistThumbnail
-}) {
-    const [songs, setSongs] = useState(undefined);
-    // const [currentSourceSong, setCurrentSourceSong] = useState(undefined);
+    sourceCredentials, destinationCredentials
+}: MigrateSequenceProps) {
     const [currentDestinationSong, setCurrentDestinationSong] = useState<Song>(null);
     const [currentIndex, setCurrentIndex] = useState(undefined);
     const [loading, setLoading] = useState(true);
@@ -29,49 +36,8 @@ function MigrateSequence({
     const [showReport, setShowReport] = useState(false);
     const [_isContinue, setIsContinue] = useState(true);
     const [isDone, setIsDone] = useState(false);
-    async function youtubeInsert(playlistId, songs, index) {
-        if (!isContinue) {
-            return false;
-        }
-        if (index < songs.length) {
-            let payload = {
-                "snippet": {
-                    "playlistId": playlistId,
-                    "position": 0,
-                    "resourceId": {
-                        "kind": "youtube#video",
-                        "videoId": songs[index].external_id
-                    }
-                }
-            }
-            try {
-                if (!isContinue) {
-                    return false;
-                }
-                let { data } = await axios.post(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet`, payload, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${destinationCredentials.accessToken}`
-                    }
-                })
 
-            } catch (error) {
-                return false
-            }
-            if (!isContinue) {
-                return false;
-            }
-            return await youtubeInsert(playlistId, songs, index + 1)
-        }
-        if (!isContinue) {
-            return false;
-        }
-        return true
-
-    }
     async function insertPlaylist(playlistId) {
-
         try {
             if (!isContinue) {
                 return false;
@@ -82,9 +48,6 @@ function MigrateSequence({
             console.log(error);
             return false
         }
-
-
-
     }
     async function createPlaylist() {
         try {
@@ -108,8 +71,7 @@ function MigrateSequence({
         setCurrentIndex(i)
         setCurrentDestinationSong(songs[i])
         try {
-            let { data } = await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${songs[i].artists[0].name}&title=${songs[i].name}&source=${source}&isrc=${songs[i].isrc}`)
-            let result: SongAPIResult = await data.result
+            let result = await pmapi.searchSong(songs[i], sourceCredentials.providerId)
             mfoundSongs.push(result)
             setFoundSongs((foundSongs) => [...foundSongs, result])
             return await searchSong(songs, i + 1)
@@ -158,7 +120,7 @@ function MigrateSequence({
         const _startMigrate = async () => {
             await startMigrate()
         }
-        if (source == 'SPOTIFY' && playlistId != undefined && playlistName != undefined && playlistThumbnail) {
+        if (playlistId != undefined && playlistName != undefined && playlistThumbnail) {
             _startMigrate()
         }
     }, []);

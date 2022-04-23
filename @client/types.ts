@@ -42,3 +42,10 @@ export abstract class Service {
     abstract insertItemsToPlaylist(account: Account, playlistId: string, song: SongAPIResult[], privacy: privacy, position: number): Promise<boolean>
     abstract config(account: Account): any
 }
+
+export type Source = 'spotify' | 'google'
+
+export const apiMap = {
+    'spotify': 'SPOTIFY',
+    'google': 'YT'
+}

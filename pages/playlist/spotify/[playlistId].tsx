@@ -246,11 +246,8 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
                 onCancel={handleStopMigration}
                 onFinish={handleFinishMigration}
                 onStart={() => console.log('starting')}
-                source='SPOTIFY'
-                destination='YT'
                 playlistName={playlist?.name}
-                playlistId={playlistId}
-                start={isMigrating}
+                playlistId={playlistId.toString()}
                 playlistThumbnail={playlist.imageSrc}
 
               />
