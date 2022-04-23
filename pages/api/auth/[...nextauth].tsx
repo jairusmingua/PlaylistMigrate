@@ -1,13 +1,22 @@
 
+import { prisma } from '../../../db/prisma'
+import { Account } from "@prisma/client"
+
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getSession, getProviders } from 'next-auth/client'
 import NextAuth from 'next-auth'
 import Providers from 'next-auth/providers'
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient, User, Account } from "@prisma/client"
-import { Spotify } from '../../../services/Spotify'
-import { Youtube } from '../../../services/Youtube'
-const prisma = new PrismaClient()
+
+import spotify from '../../../services/Spotify'
+import youtube from '../../../services/Youtube'
+import { Service } from '../../../services/types'
+import { tokenExpiration } from '../../../util'
+
+const services : {[provider: string]: Service} = {
+    'spotify': spotify,
+    'google': youtube
+}
 
 export default async (_: NextApiRequest, res: NextApiResponse) =>
     NextAuth(_, res, {
@@ -53,16 +62,8 @@ export default async (_: NextApiRequest, res: NextApiResponse) =>
                     }
                 })
                 accounts.map((account) => {
-                    const difference = (Date.now() - account.updatedAt.getTime()) / 1000
-                    if (difference > 1000) {
-                        if (account.providerId == 'spotify') {
-                            const spotifyService = new Spotify()
-                            spotifyService.refreshToken(account)
-                        }
-                        if (account.providerId == 'google') {
-                            const youtubeService = new Youtube()
-                            youtubeService.refreshToken(account)
-                        }
+                    if (tokenExpiration(account.updatedAt) > 1000) {
+                        services[account.providerId].refreshToken(account)
                     }
                 })
                 return session

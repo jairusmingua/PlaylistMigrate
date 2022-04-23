@@ -1,11 +1,13 @@
-import { Credentials, AuthType, OAuthType, SpotifyPlaylist, Song } from './types';
+import { Credentials, AuthType, OAuthType, SpotifyPlaylist, Song, Service } from './types';
 import { Account, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
 
-export class Spotify {
-
+export class Spotify extends Service {
+    constructor() {
+        super()
+    }
     async refreshToken(account: Account): Promise<Account> {
         try {
             const url = `https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=${account.refreshToken}`
@@ -38,7 +40,7 @@ export class Spotify {
         }
 
     }
-    async getPlaylists(account: Account): Promise<Array<Playlist>> {
+    async getPlaylists(account: Account): Promise<Playlist[] | any> {
         try {
             const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
             const response = await fetch(url, {

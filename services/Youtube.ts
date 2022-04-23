@@ -1,10 +1,10 @@
-import { Credentials, AuthType, OAuthType, YoutubePlaylist, Song } from './types';
+import { Credentials, AuthType, OAuthType, YoutubePlaylist, Song, Service } from './types';
 import { Account, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
 
-export class Youtube {
+export class Youtube extends Service {
 
     async refreshToken(account: Account): Promise<Account> {
         try {
@@ -46,7 +46,7 @@ export class Youtube {
         }
 
     }
-    async getPlaylists(account: Account): Promise<Array<Playlist>> {
+    async getPlaylists(account: Account): Promise<Playlist[] | any> {
         try {
             const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
             const response = await fetch(url, {

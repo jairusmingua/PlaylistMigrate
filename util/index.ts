@@ -1,6 +1,6 @@
 import { CallBackStatus } from '../services/types'
 
-export function secondDifference(timestamp: Date): Number {
+export function tokenExpiration(timestamp: Date): Number {
     return (Date.now() - timestamp.getTime()) / 1000
 }
 
