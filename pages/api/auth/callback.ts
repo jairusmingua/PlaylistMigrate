@@ -7,13 +7,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const message = req.query['message'].toString()
     const url = new URL(req.cookies['next-auth.callback-url'])
     try {
-        console.log(url)
-        console.log(url.pathname)
         const params = new URLSearchParams({
             message: message,
             status: status
         })
-        console.log(params);
         res.redirect(url.origin + url.pathname + '?'+params)
     } catch (error) {
         console.log(error)

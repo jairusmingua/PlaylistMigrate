@@ -2,11 +2,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getSession, GetSessionOptions } from 'next-auth/client';
 import { prisma } from '../../../db/prisma';
-import { getOauthAccount } from '../../../repositories/UserRepository';
-import spotify from '../../../services/Spotify'
 
 export default async (_: NextApiRequest, res: NextApiResponse) => {
-    const prefix = 'api/unlink'
     const session = await getSession({ req: _ })
     const account = _.body
     try {

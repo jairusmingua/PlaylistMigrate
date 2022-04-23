@@ -83,7 +83,6 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
   }
   useEffect(() => {
     if (option != null) {
-      console.log(option)
       setDestinationCredentials(accounts.filter((account) => account.providerId == option)[0])
     }
   }, [option]);
@@ -94,7 +93,6 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
           setSongs(songs)
           services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
             .then((playlist) => {
-              console.log(playlist)
               setPlaylist(playlist)
               setLoading(false)
             })

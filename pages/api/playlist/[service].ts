@@ -9,7 +9,6 @@ import { services } from '../../../services'
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         let { service } = req.query
-        console.log(service)
         let user = await getUser({ req: req })
         const credentials = getOauthAccount(user.accounts, service.toString())
         if (!credentials) {
@@ -24,7 +23,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         const playlist: Playlist[] = await services[service.toString()].getPlaylists(credentials)
         if(dbplaylist.length == 0){
-            console.log('empty adding up...')
             await prisma.playlist.createMany({
                 data: [...playlist]
             })

@@ -2,12 +2,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getSession, GetSessionOptions } from 'next-auth/client';
 import { prisma } from '../../../db/prisma';
-import { getOauthAccount } from '../../../repositories/UserRepository';
-import spotify from '../../../services/Spotify'
-import PrimarySelect from '../../primary-select';
 
 export default async (_: NextApiRequest, res: NextApiResponse) => {
-    const prefix = 'api/set-primary'
     const session = await getSession({ req: _ })
     const account = _.body
     try {
