@@ -1,9 +1,26 @@
-import { Credentials, AuthType, OAuthType, SpotifyPlaylist, Song, Service } from './types';
+import { Credentials, AuthType, OAuthType, Song, Service, Profile, Playlist as P } from './types';
 import { Account, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
 
+class SpotifyProfile extends Profile {
+    constructor(profile: any) {
+        super();
+        this.name = profile['display_name'];
+        this.profilePic_url = profile['images'][0].url;
+    }
+}
+
+class SpotifyPlaylist extends P {
+    constructor(playlist: any) {
+        super();
+        this.name = playlist.name;
+        this.id = playlist.id;
+        this.image = playlist.images[0];
+        this.description = playlist.description
+    }
+}
 export class Spotify extends Service {
     constructor() {
         super()

@@ -1,9 +1,24 @@
-import { Credentials, AuthType, OAuthType, YoutubePlaylist, Song, Service } from './types';
+import { Credentials, AuthType, OAuthType, Song, Service, Profile, Playlist as P } from './types';
 import { Account, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
 
+class YoutubeProfile extends Profile {
+    constructor(profile: any) {
+        super();
+        this.name = profile.items[0].snippet.title;
+        this.profilePic_url = profile.items[0].snippet.thumbnails.default.url
+    }
+}
+class YoutubePlaylist extends P {
+    constructor(playlist: any) {
+        super();
+        this.name = playlist.snippet.title;
+        this.id = playlist.id;
+        this.image = playlist.snippet.thumbnails.medium.url;
+    }
+}
 export class Youtube extends Service {
 
     async refreshToken(account: Account): Promise<Account> {
