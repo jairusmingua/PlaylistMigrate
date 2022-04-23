@@ -1,17 +1,21 @@
-import { Account, User } from "@prisma/client";
 import axios from "axios";
+
+import { Account } from "@prisma/client";
+
 import { GetServerSideProps } from "next";
-import { signIn, signOut } from "next-auth/client";
 import Head from "next/head";
-import { FunctionComponent, useState } from "react";
-import { getUser } from "../../repositories/UserRepository";
 import { useRouter } from 'next/router'
+import { signOut } from "next-auth/client";
+
 import { generateCallback } from "../../util";
+import { getUser } from "../../repositories/UserRepository";
+
 import AlertBox from "../../components/AlertBox";
+
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const user = await getUser(req, res)
-    if (!user){
+    if (!user) {
         return {
             redirect: {
                 permanent: true,
@@ -27,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
             }
         }
     }
-    
+
     return { props: { accounts: user.accounts } }
 };
 

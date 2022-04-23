@@ -1,17 +1,14 @@
-import { useRouter } from "next/router";
-import { signOut, useSession, getSession } from 'next-auth/client'
-import { Container, Card, Row, Col, Button, Modal, Alert } from 'react-bootstrap'
+import { useState } from 'react'
 
-import { useEffect, useState } from 'react'
-import { Playlist, PrismaClient } from "@prisma/client"
 import { GetServerSideProps } from "next";
-import { prisma } from '../../db/prisma'
+import Head from "next/head";
+
+import { getUser } from "../../repositories/UserRepository";
+
 import PageNavigation from '../../components/PageNavigation';
 import Linking from '../../components/setting/Linking';
 import Preference from '../../components/setting/Preference';
 import Privacy from '../../components/setting/Privacy';
-import { getUser } from "../../repositories/UserRepository";
-import Head from "next/head";
 import AlertBox from "../../components/AlertBox";
 
 

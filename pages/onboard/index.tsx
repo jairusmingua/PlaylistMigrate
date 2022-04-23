@@ -1,11 +1,14 @@
-import { Account, User } from "@prisma/client";
-import axios from "axios";
+import { useState } from "react";
+
+import { Account } from "@prisma/client";
+
 import { GetServerSideProps } from "next";
 import { signIn, signOut } from "next-auth/client";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FunctionComponent, useState } from "react";
+
 import AlertBox from "../../components/AlertBox";
+
 import { getUser } from "../../repositories/UserRepository";
 import { generateCallback } from "../../util";
 

@@ -1,13 +1,15 @@
 import { Suspense } from 'react'
-import { signOut, useSession, getSession } from 'next-auth/client'
 import { Canvas, extend } from '@react-three/fiber'
-import { OrbitControls, useGLTF } from '@react-three/drei'
 import { Navbar, Container, Button } from 'react-bootstrap'
-import { GetServerSideProps } from "next";
+import { OrbitControls, useGLTF } from '@react-three/drei'
 
-import Nav from '../components/Nav';
-import { Footer } from '../components/Footer';
+import { GetServerSideProps } from "next";
 import Head from 'next/head'
+import { signOut, useSession, getSession } from 'next-auth/client'
+
+import { Footer } from '../components/Footer';
+import Nav from '../components/Nav';
+
 
 extend({ OrbitControls });
 

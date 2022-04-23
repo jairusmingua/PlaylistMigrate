@@ -1,12 +1,16 @@
+import { useEffect } from 'react';
 import { Container, Card, Row, Col, Button } from 'react-bootstrap'
+
+import { GetServerSideProps } from "next";
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Session } from 'next-auth'
 import { getSession, providers, signIn, signOut, useSession } from 'next-auth/client'
-import { useEffect } from 'react';
-import { GetServerSideProps } from "next";
-import Head from 'next/head';
+
 import AlertBox from '../components/AlertBox';
+
+
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
     const session = await getSession({ req });

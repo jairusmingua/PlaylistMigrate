@@ -1,17 +1,16 @@
-import { signOut, useSession, getSession } from 'next-auth/client'
-import { Container, Card, Row, Col, Button, Modal } from 'react-bootstrap'
+import axios from 'axios';
 
 import { useEffect, useState } from 'react'
-import { Playlist, PrismaClient } from "@prisma/client"
+import { Button, Modal, Spinner } from 'react-bootstrap'
+
 import { GetServerSideProps } from "next";
-import { prisma } from '../../../db/prisma'
-import { User } from '.prisma/client'
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import { Spinner } from 'react-bootstrap';
-import MigrateSequence from '../../../components/MigrateSequence';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+
+import MigrateSequence from '../../../components/MigrateSequence';
+
 import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
+
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 

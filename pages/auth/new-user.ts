@@ -1,16 +1,11 @@
 
-import { GetServerSideProps, InferGetServerSidePropsType, NextApiRequest, NextApiResponse } from 'next'
-import { getSession, getProviders } from 'next-auth/client'
-import NextAuth from 'next-auth'
-import Providers from 'next-auth/providers'
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient, User, Account } from "@prisma/client"
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { getUser } from '../../repositories/UserRepository'
-const prisma = new PrismaClient()
+import { prisma } from '../../db/prisma'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const user = await getUser(req, res)
-    if(!user){
+    if (!user) {
         return {
             redirect: {
                 permanent: true,
