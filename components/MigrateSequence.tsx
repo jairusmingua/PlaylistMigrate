@@ -4,21 +4,33 @@ import { Navbar, Container, Button, Spinner } from 'react-bootstrap';
 import axios from 'axios'
 import Head from 'next/head';
 
-function MigrateSequence({ source, destination, playlistName, playlistId, start, onStart, onCancel, onFinish, sourceCredentials, destinationCredentials, playlistThumbnail }) {
+let isContinue = true
+let mfoundSongs = []
+
+function MigrateSequence({ 
+    source, destination, playlistName, 
+    playlistId, start, 
+    onStart, onCancel, onFinish, 
+    sourceCredentials, 
+    destinationCredentials, 
+    playlistThumbnail 
+}) {
     const [songs, setSongs] = useState(undefined);
     const [currentSourceSong, setCurrentSourceSong] = useState(undefined);
     const [currentDestinationSong, setCurrentDestinationSong] = useState(null);
     const [currentIndex, setCurrentIndex] = useState(undefined);
     const [loading, setLoading] = useState(true);
-    const [isCollected, setIsCollected] = useState(false);
     const [playlistSize, setPlaylistSize] = useState(null);
     const [statusMsg, setStatusMsg] = useState(null);
-    const [notFoundCount, setNotFoundCount] = useState(0);
     const [notFoundSongs, setNotFoundSongs] = useState([]);
     const [foundSongs, setFoundSongs] = useState([]);
     const [showReport, setShowReport] = useState(false);
+    const [_isContinue, setIsContinue] = useState(true);
+    const [isDone, setIsDone] = useState(false);
     async function youtubeInsert(playlistId, songs, index) {
-        console.log(index)
+        if (!isContinue) {
+            return false;
+        }
         if (index < songs.length) {
             let payload = {
                 "snippet": {
@@ -31,6 +43,9 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                 }
             }
             try {
+                if (!isContinue) {
+                    return false;
+                }
                 let { data } = await axios.post(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet`, payload, {
                     headers: {
                         'Accept': 'application/json',
@@ -42,30 +57,37 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
             } catch (error) {
                 return false
             }
-            let _index = index + 1
-            return await youtubeInsert(playlistId, songs, _index)
+            if (!isContinue) {
+                return false;
+            }
+            return await youtubeInsert(playlistId, songs, index + 1)
+        }
+        if (!isContinue) {
+            return false;
         }
         return true
 
     }
-    async function insertPlaylist(playlistId, foundSongs) {
-        console.log('insertPlaylist')
-        console.log(source, destination)
+    async function insertPlaylist(playlistId) {
         if (source == 'SPOTIFY' && destination == 'YT') {
-            console.log(`Inserting ${playlistId}`)
             try {
-                return await youtubeInsert(playlistId, foundSongs, 0)
-                
+                if (!isContinue) {
+                    return false;
+                }
+                return await youtubeInsert(playlistId, mfoundSongs, 0)
+
             } catch (error) {
                 console.log(error);
-
+                return false
             }
 
         }
 
     }
     async function createPlaylist() {
-        console.log('createPlaylist')
+        if (!isContinue) {
+            return false;
+        }
         if (source == 'SPOTIFY' && destination == 'YT') {
             const payload = {
                 "snippet": {
@@ -83,6 +105,9 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
             }
 
             try {
+                if (!isContinue) {
+                    return false;
+                }
                 let { data } = await axios.post(`https://youtube.googleapis.com/youtube/v3/playlists?part=snippet%2Cstatus`, payload, {
                     headers: {
                         'Accept': 'application/json',
@@ -94,17 +119,59 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
 
             } catch (error) {
                 console.log(error)
+                return false
             }
         }
 
     }
+    async function searchSong(songs, i) {
+        if (!isContinue) {
+            return false;
+        }
+        if (!(i < songs.length)) {
+            return true
+        }
+        setCurrentIndex(i)
+        const title = source == 'SPOTIFY' ? songs[i]['track']['name'] : ''
+        const artist = source == 'SPOTIFY' ? songs[i]['track']['artists'][0]['name'] : ''
+        const thumbnail_src = source == 'SPOTIFY' ? songs[i]['track']['album']['images'][0]['url'] : ''
+        const _source = source == 'SPOTIFY' ? 'SPOTIFY' : ''
+        const url = source == 'SPOTIFY' ? songs[i]['track']['external_urls']['spotify'] : ''
+        const isrc = source == 'SPOTIFY' ? songs[i]['track']['external_ids']['isrc'] : ''
+        setCurrentDestinationSong({
+            'title': title,
+            'artist': artist,
+            'thumbnail_src': thumbnail_src,
+            'source': _source,
+            'url': url,
+            'isrc': isrc
+        })
+        try {
+            let { data } = await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${artist}&title=${title}&source=${_source}&isrc=${isrc}`)
+            let result = await data.result
+            mfoundSongs.push(result)
+            setFoundSongs((foundSongs)=>[...foundSongs, result])
+            return await searchSong(songs, i + 1)
+        } catch (error) {
+            setNotFoundSongs((notFoundSongs)=>[...notFoundSongs, {
+                'title': title,
+                'artist': artist,
+                'thumbnail_src': thumbnail_src,
+                'source': _source,
+                'url': url,
+                'isrc': isrc
+            }])
+            return await searchSong(songs, i + 1)
+
+        }
+
+    }
     async function collectSongs() {
-        console.log('collectSongs')
-        let _notFoundCount = 0
-        let _foundCount = 0
-        let _foundSongs = []
-        let _notFoundSongs = []
+        setLoading(false)
         if (source == 'SPOTIFY') {
+            if (!isContinue) {
+                return false;
+            }
             let { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
                 headers: {
                     'Authorization': `Bearer ${sourceCredentials.accessToken}`,
@@ -113,66 +180,52 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
             })
             let songs = data.items
             setPlaylistSize(data.total)
-
-            setLoading(false)
-            for (let i = 0; i < songs.length; i++) {
-                setCurrentIndex(i)
-                const title = source == 'SPOTIFY' ? songs[i]['track']['name'] : ''
-                const artist = source == 'SPOTIFY' ? songs[i]['track']['artists'][0]['name'] : ''
-                const thumbnail_src = source == 'SPOTIFY' ? songs[i]['track']['album']['images'][0]['url'] : ''
-                const _source = source == 'SPOTIFY' ? 'SPOTIFY' : ''
-                const url = source == 'SPOTIFY' ? songs[i]['track']['external_urls']['spotify'] : ''
-                const isrc = source == 'SPOTIFY' ? songs[i]['track']['external_ids']['isrc'] : ''
-                setCurrentDestinationSong({
-                    'title': title,
-                    'artist': artist,
-                    'thumbnail_src': thumbnail_src,
-                    'source': _source,
-                    'url': url,
-                    'isrc': isrc
+            return await searchSong(songs, 0)
+        }
+        if (!isContinue) {
+            return false;
+        }
+        return false
+    }
+    async function startMigrate() {
+        setStatusMsg('Collecting Songs from Database...')
+        collectSongs().then(()=>{
+            setStatusMsg('Creating Playlist...')
+            createPlaylist().then((playlistId)=>{            
+                setStatusMsg('Inserting Items to Playlist...')
+                insertPlaylist(playlistId).then((result)=>{
+                    if(result){
+                        setIsDone(true)
+                    }
                 })
-                await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?artist=${artist}&title=${title}&source=${_source}&isrc=${isrc}`)
-                    .then((response) => {
-                        _foundSongs.push(response.data.result)
-                        setFoundSongs(_foundSongs)
-                        _foundCount += 1
-                    }).catch((response) => {
-                        _notFoundSongs.push({
-                            'title': title,
-                            'artist': artist,
-                            'thumbnail_src': thumbnail_src,
-                            'source': _source,
-                            'url': url,
-                            'isrc': isrc
-                        })
-                        setNotFoundSongs(_notFoundSongs)
-                        _notFoundCount += 1
-                        setNotFoundCount(_notFoundCount)
-                    })
+            })
+
+        })
+    }
+
+    function handleCancel() {
+        isContinue = false
+        onFinish()
+    }
+    useEffect(() => {
+        const _startMigrate = async () => {
+            await startMigrate()
+        }
+        if (source == 'SPOTIFY' && playlistId != undefined && playlistName != undefined && playlistThumbnail) {
+            _startMigrate()
+        }
+    }, []);
+    useEffect(() => {
+        if (isDone) {
+            isContinue = false
+            if (notFoundSongs.length > 0) {
+                setShowReport(true)
+            } else {
+                onFinish()
 
             }
         }
-        return _foundSongs
-
-    }
-    async function startMigrate() {
-        console.log('startMigrate')
-        setStatusMsg('Collecting Songs from Database...')
-        let foundSongs = await collectSongs()
-        setStatusMsg('Creating Playlist...')
-        let playlistId = await createPlaylist()
-        setStatusMsg('Inserting Songs to Playlist...')
-        let result = await insertPlaylist(playlistId, foundSongs)
-    }
-
-    useEffect(() => {
-        if (source == 'SPOTIFY' && playlistId != undefined && playlistName != undefined && playlistThumbnail) {
-            startMigrate().then(() => {
-                onFinish()
-            })
-        }
-    }, []);
-
+    }, [isDone]);
     return (
         <>
             <Head>
@@ -218,10 +271,10 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                                 </div>
                                 <div className="d-flex w-100 justify-content-center align-items-center flex-column pt-5">
                                     <span>Song {currentIndex + 1} out of {playlistSize}</span>
-                                    <span className="text-danger">Failed to Collect Songs: {notFoundCount}</span>
+                                    <span className="text-danger">Failed to Collect Songs: {notFoundSongs.length}</span>
                                 </div>
                                 <div className="d-flex w-100 justify-content-center flex-column pt-5">
-                                    <button className="btn btn-danger" onClick={onCancel}>Cancel</button>
+                                    <button className="btn btn-danger" onClick={handleCancel}>Cancel</button>
                                 </div>
 
                             </div> :
@@ -229,7 +282,7 @@ function MigrateSequence({ source, destination, playlistName, playlistId, start,
                                 <div className="row">
                                     <div className="d-flex w-100 justify-content-center align-items-center py-5 flex-column">
                                         <h6>Migration Summary</h6>
-                                        <p className="text-danger">Out of <b>{playlistSize}</b>, <b>{notFoundCount}</b> we're not found.</p>
+                                        <p className="text-danger">Out of <b>{playlistSize}</b>, <b>{notFoundSongs.length}</b> we're not found.</p>
                                     </div>
 
                                 </div>

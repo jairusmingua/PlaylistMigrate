@@ -1,4 +1,3 @@
-import axios from 'axios';
 
 import { useEffect, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
@@ -10,7 +9,9 @@ import { useRouter } from 'next/router';
 import MigrateSequence from '../../../components/MigrateSequence';
 
 import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
-
+import { Account, User } from '@prisma/client';
+import { Playlist, Song } from '../../../@client/types';
+import { services } from '../../../@client';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
@@ -23,22 +24,34 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       }
     }
   }
-  const spotifyCredentials = getOauthAccount(user.accounts, 'Spotify')
-  const youtubeCredentials = getOauthAccount(user.accounts, 'Google')
-  return { props: { user: user, spotifyCredentials, youtubeCredentials } }
+  return {
+    props: {
+      user: user,
+      accounts: user.accounts,
+      currentCredentials: getOauthAccount(user.accounts, 'Spotify')
+    }
+  }
 
 };
 
-export default function PlaylistView({ user, spotifyCredentials, youtubeCredentials }) {
+interface PlaylistViewProps {
+  user: User,
+  accounts: Account[],
+  currentCredentials: Account
+}
+
+
+export default function PlaylistView({ user, accounts, currentCredentials }: PlaylistViewProps) {
   const router = useRouter()
   const { playlistId } = router.query
-  const [playlist, setPlaylist] = useState(null);
-  const [songs, setSongs] = useState([])
+  const [playlist, setPlaylist] = useState<Playlist>(null);
+  const [songs, setSongs] = useState<Song[]>([])
   const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false)
   const [isMigrating, setIsMigrating] = useState(false);
   const [doneMigrating, setDoneMigrating] = useState(false);
-
+  const [destinationCredentials, setDestinationCredentials] = useState(null);
+  const [option, setOption] = useState(null);
   function handleClose() {
     setShowModal(false)
     setIsMigrating(false)
@@ -60,39 +73,25 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
     setLoading(false)
     setIsMigrating(false)
   }
-
+  useEffect(() => {
+    if (option != null) {
+      console.log(option)
+      setDestinationCredentials(accounts.filter((account) => account.providerId == option)[0])
+    }
+  }, [option]);
   useEffect(() => {
     if (playlistId != undefined) {
-      const songs = async () => {
-        let { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-          headers: {
-            'Authorization': `Bearer ${spotifyCredentials.accessToken}`,
-            'Accept': 'application/json'
-          }
-        })
-        setSongs(data.items)
-
-      }
-      const playlist = async () => {
-        let { data } = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-          headers: {
-            'Authorization': `Bearer ${spotifyCredentials.accessToken}`,
-            'Accept': 'application/json'
-          }
-        })
-        setPlaylist({
-          name: data.name,
-          image: data.images[0].url
-        })
-
-      }
-      songs().then(() => {
-        playlist().then(() => {
+      services[currentCredentials.providerId].getPlaylistSongs(currentCredentials, playlistId)
+      .then((songs)=>{
+        setSongs(songs)
+        services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
+        .then((playlist)=>{
+          setPlaylist(playlist)
           setLoading(false)
-
-        }).catch((err) => console.log(err))
-
-      }).catch((err) => console.log(err))
+        })
+      }).catch((err)=>{
+        console.log(err)
+      })
     }
   }, [playlistId]);
   return (
@@ -104,7 +103,6 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
         <a className="btn-outline-light" href="/dashboard">
           <i className="bi bi-arrow-left"></i>
         </a>
-        {/* <button>Profile</button> */}
       </div>
       {loading ? (
         <>
@@ -123,14 +121,14 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
                     <div className="p-4">
                       <div className="d-flex flex-column align-items-center w-100 pt-5 position-relative" style={{ zIndex: 50 }}>
 
-                        <img src={playlist.image} style={{ aspectRatio: '1', height: '10vw', minHeight: '90px' }} alt="" />
+                        <img src={playlist.imageSrc} style={{ aspectRatio: '1', height: '10vw', minHeight: '90px' }} alt="" />
                         <h1 className="py-4 text-center">{playlist.name}</h1>
 
                         <Button onClick={handleOpen} className="spotifyMigrateBtn" variant="dark" size="lg">
                           Migrate
                         </Button>
                       </div>
-                      <img src={playlist.image} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
+                      <img src={playlist.imageSrc} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
 
                     </div>
 
@@ -139,15 +137,15 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
                     <ul className="px-0 pt-0 m-0" style={{ overflowY: 'scroll', height: '100vh' }}>
                       {
                         songs.map((song, i) => <>{
-                          song.track.id != null &&
+                          song.id != null &&
                           <li key={i} style={{ listStyle: 'none', backgroundColor: 'black' }} className="playlistSongItem mb-3 p-3">
                             <div className="d-flex gap-3">
-                              <img className="mx-3" height={50} width={50} src={song.track.album.images[0].url} alt={song.track.name} />
+                              <img className="mx-3" height={50} width={50} src={song?.imageSrc} alt={song?.name} />
                               <div className="d-flex flex-column">
-                                <h4>{song.track.name}</h4>
+                                <h4>{song.name}</h4>
                                 <span>
                                   {
-                                    song.track.artists.map((artist, i) => <span key={i}>{artist.name}{song.track.artists.length == i + 1 ? '' : ','}  </span>)
+                                    song.artists.map((artist, i) => <span key={i}>{artist.name}{song.artists.length == i + 1 ? '' : ','}  </span>)
                                   }
                                 </span>
                               </div>
@@ -165,15 +163,15 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
                     songs.map((song, i) =>
                       <>
                         {
-                          song.track.id != null &&
+                          song.id != null &&
                           <li key={i} style={{ listStyle: 'none', backgroundColor: 'black' }} className="playlistSongItem mb-3 p-3">
                             <div className="d-flex gap-3">
-                              <img className="mx-3" height={50} width={50} src={song.track.album.images[0]?.url} alt={song.track?.name} />
+                              <img className="mx-3" height={50} width={50} src={song.imageSrc} alt={song?.name} />
                               <div className="d-flex flex-column">
-                                <h4>{song.track.name}</h4>
+                                <h4>{song.name}</h4>
                                 <span>
                                   {
-                                    song.track.artists.map((artist, i) => <span key={i}>{artist.name}{song.track.artists.length == i + 1 ? '' : ','}  </span>)
+                                    song.artists.map((artist, i) => <span key={i}>{artist.name}{song.artists.length == i + 1 ? '' : ','}  </span>)
                                   }
                                 </span>
                               </div>
@@ -207,20 +205,28 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
                       <Modal.Body>
                         <p>Select <b>Platform</b> to Migrate your playlist: </p>
                         <form>
-                          <div className="form-check d-flex align-items-center">
-                            <input type="checkbox" className="form-check-input" checked />
-                            <label className="form-check-label d-flex align-items-center">
-                              <img src="/youtube.png" height="30px" width="30px" />
-                              <span>Youtube Music</span>
 
-                            </label>
-                          </div>
+                          {
+                            accounts.filter((account) => account.providerId != currentCredentials.providerId).map((account, i) =>
+                              <>
+                                <div className="form-check d-flex align-items-center">
+                                  <input onClick={() => setOption(account.providerId)} type="radio" className="form-check-input" value={account.providerId} id={account.providerId} name={account.providerId} checked={option == account.providerId} />
+                                  <label className="form-check-label d-flex align-items-center" htmlFor={account.providerId}>
+                                    <img src={`/${account.providerId == 'google' ? 'youtube' : account.providerId}.png`} height="30px" width="30px" />
+                                    <span>{account.providerId == 'google' ? 'Youtube Music' : account.providerId}</span>
+                                  </label>
+                                </div>
+                              </>
+                            )
+                          }
                         </form>
+
+
                       </Modal.Body>
 
                       <Modal.Footer>
                         <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-                        <Button className="spotifyMigrateBtn" variant="primary" onClick={handleMigration}>Migrate</Button>
+                        <Button className="spotifyMigrateBtn" variant="primary" onClick={handleMigration} disabled={option == null}>Migrate</Button>
                       </Modal.Footer>
                     </>
                   }
@@ -235,8 +241,8 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
               </div>
             ) : (
               <MigrateSequence
-                sourceCredentials={spotifyCredentials}
-                destinationCredentials={youtubeCredentials}
+                sourceCredentials={currentCredentials}
+                destinationCredentials={destinationCredentials}
                 onCancel={handleStopMigration}
                 onFinish={handleFinishMigration}
                 onStart={() => console.log('starting')}
@@ -245,7 +251,7 @@ export default function PlaylistView({ user, spotifyCredentials, youtubeCredenti
                 playlistName={playlist?.name}
                 playlistId={playlistId}
                 start={isMigrating}
-                playlistThumbnail={playlist.image}
+                playlistThumbnail={playlist.imageSrc}
 
               />
             )
