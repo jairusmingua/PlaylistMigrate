@@ -10,14 +10,14 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
 import { tokenExpiration } from '../../../util'
 import { services } from '../../../services'
- 
+
 export default async (_: NextApiRequest, res: NextApiResponse) =>
     NextAuth(_, res, {
         providers: [
             Providers.Spotify({
                 clientId: process.env.SPOTIFY_CLIENT_ID,
                 clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-                scope: 'user-read-private user-read-email'
+                scope: 'user-read-private user-read-email playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private'
             }),
             Providers.Google({
                 clientId: process.env.YOUTUBE_CLIENT_ID,
