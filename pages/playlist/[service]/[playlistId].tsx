@@ -9,7 +9,7 @@ import MigrateSequence from '../../../components/MigrateSequence';
 
 import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
 import { Account, User } from '@prisma/client';
-import { Playlist, Song } from '../../../@client/types';
+import { Playlist, Song, UIImg, UIName } from '../../../@client/types';
 import { services } from '../../../@client';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
@@ -219,8 +219,8 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
                                 <div className="form-check d-flex align-items-center">
                                   <input onClick={() => setOption(account.providerId)} type="radio" className="form-check-input" value={account.providerId} id={account.providerId} name={account.providerId} checked={option == account.providerId} />
                                   <label className="form-check-label d-flex align-items-center" htmlFor={account.providerId}>
-                                    <img src={`/${account.providerId == 'google' ? 'youtube' : account.providerId}.png`} height="30px" width="30px" />
-                                    <span>{account.providerId == 'google' ? 'Youtube Music' : account.providerId}</span>
+                                    <img src={UIImg[account.providerId]} height="30px" width="30px" />
+                                    <span>{UIName[account.providerId]}</span>
                                   </label>
                                 </div>
                               </>

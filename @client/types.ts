@@ -49,3 +49,12 @@ export const apiMap = {
     'spotify': 'SPOTIFY',
     'google': 'YT'
 }
+
+export const UIName = {
+    'spotify': 'Spotify',
+    'google': 'Youtube Music'
+}
+export const UIImg = {
+    'spotify': '/spotify.png',
+    'google': '/youtube.png'
+}

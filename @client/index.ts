@@ -3,6 +3,7 @@ import axios from "axios";
 import { Spotify } from "./Spotify";
 import { Youtube } from "./Youtube";
 import { apiMap, Service, Song, SongAPIResult, Source } from "./types";
+import { Account } from "@prisma/client";
 
 
 
@@ -28,6 +29,15 @@ export class PMAPI {
         let params = new URLSearchParams({...p})
         let { data } = await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?${params}`)
         let result: SongAPIResult[] = await data.result
+        console.log(result)
         return result
     }
+}
+
+export function getOauthAccount(accounts : Account[], providerId: Source | string): Account{
+    const account = accounts.filter((account)=> account.providerId == providerId.toLowerCase())
+    if(account.length == 0){
+        return null
+    }
+    return account[0]
 }
