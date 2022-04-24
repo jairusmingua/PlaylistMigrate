@@ -72,8 +72,8 @@ function MigrateSequence({
         setCurrentDestinationSong(songs[i])
         try {
             let result = await pmapi.searchSong(songs[i], sourceCredentials.providerId)
-            mfoundSongs.push(result)
-            setFoundSongs((foundSongs) => [...foundSongs, result])
+            mfoundSongs.push(result[0])
+            setFoundSongs((foundSongs) => [...foundSongs, result[0]])
             return await searchSong(songs, i + 1)
         } catch (error) {
             setNotFoundSongs((notFoundSongs) => [...notFoundSongs, songs[i]])

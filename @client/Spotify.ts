@@ -6,7 +6,7 @@ import { Account } from "@prisma/client";
 
 export class Spotify extends Service {
     baseUrl = 'https://api.spotify.com/v1'
-    constructor() { super({allowsBulk: true}) }
+    constructor() { super({ allowsBulk: true }) }
     async getPlaylist(account: Account, playlistId: string | string[]): Promise<Playlist> {
         try {
 
@@ -25,7 +25,7 @@ export class Spotify extends Service {
             return null
         }
     }
-    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{songs: Song[], totalSongs: number}> {
+    async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{ songs: Song[], totalSongs: number }> {
         try {
             let response = await axios.get(`${this.baseUrl}/playlists/${playlistId}/tracks`,
                 this.config(account))
@@ -65,7 +65,7 @@ export class Spotify extends Service {
             }
             let response = await axios.post(`${this.baseUrl}/users/${account.userId}/playlists`,
                 payload, this.config(account))
-            if (response.status != 200) {
+            if (response.status != 201) {
                 throw response.data
             }
             return {
@@ -84,11 +84,15 @@ export class Spotify extends Service {
             const payload = {
                 uris: song.map((song) => {
                     return `spotify:track:${song.external_id}`
-                }),
-                positon: 0
+                })
             }
-            let response = await axios.post(`${this.baseUrl}/playlists/${playlistId}/tracks`,
-                payload, this.config(account))
+            let response = await axios.post(`${this.baseUrl}/playlists/${playlistId}/tracks?position=0`,
+                payload, {
+                headers: {
+                    'Authorization': `Bearer ${account.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            })
             if (response.status != 200) {
                 throw response.data
             }
