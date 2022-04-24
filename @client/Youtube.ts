@@ -111,7 +111,7 @@ export class Youtube extends Service {
                     'position': 0,
                     'resourceId': {
                         'kind': 'youtube#video',
-                        'videoId': song[0].external_id
+                        'videoId': song[position].external_id
                     }
                 }
             }
