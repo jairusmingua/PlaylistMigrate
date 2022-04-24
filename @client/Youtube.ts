@@ -13,7 +13,7 @@ export class Youtube extends Service {
                 part: 'snippet,status',
                 id: playlistId.toString()
             })
-            let response = await axios.get(`${this.baseUrl}/playlists/?${params}`,
+            let response = await axios.get(`${this.baseUrl}/playlists?${params}`,
                 this.config(account))
             if (response.status != 200) {
                 throw response.data
@@ -23,8 +23,8 @@ export class Youtube extends Service {
             }
             return {
                 'id': response.data.items[0].id,
-                'name': response.data.items[0].title,
-                'imageSrc': response.data.items[0].thumbnails['default'].url,
+                'name': response.data.items[0].snippet.title,
+                'imageSrc': response.data.items[0].snippet.thumbnails['default'].url,
                 'privacy': response.data.items[0].status.privacyStatus
             }
         } catch (error) {
@@ -38,7 +38,7 @@ export class Youtube extends Service {
                 playlistId: playlistId.toString(),
                 maxResults: '50'
             })
-            let response = await axios.get(`${this.baseUrl}/playlistsItems/?${params}`,
+            let response = await axios.get(`${this.baseUrl}/playlistItems?${params}`,
                 this.config(account))
             if (response.status != 200) {
                 throw response.data
