@@ -1,4 +1,4 @@
-import { Account } from "@prisma/client";
+import { Account, Playlist as P } from "@prisma/client";
 
 export class Profile {
     name: string;
@@ -46,5 +46,5 @@ export type CallBackStatus = 'ERROR' | 'SUCCESS'
 export abstract class Service {
     constructor() { }
     abstract refreshToken(account: Account): Promise<Account>
-    abstract getPlaylists(account: Account)
+    abstract getPlaylists(account: Account, dbplaylist: P[], playlist?: P[], next?: string | null)
 }

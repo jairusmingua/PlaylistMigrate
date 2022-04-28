@@ -17,12 +17,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const dbplaylist = await prisma.playlist.findMany({
             where: {
                 userId: user.id,
-                platform: service == 'spotify'? 'SPOTIFY':'YOUTUBE'
+                platform: service == 'spotify' ? 'SPOTIFY' : 'YOUTUBE'
             }
         })
 
-        const playlist: Playlist[] = await services[service.toString()].getPlaylists(credentials)
-        if(dbplaylist.length == 0){
+        const playlist: Playlist[] = await services[service.toString()].getPlaylists(credentials, dbplaylist)
+        if (dbplaylist.length == 0) {
             await prisma.playlist.createMany({
                 data: [...playlist]
             })
@@ -30,30 +30,38 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                 items: playlist
             })
         }
-        if (playlist.length > dbplaylist.length) {
-            let _ = playlist.filter((p) => {
-                if (dbplaylist.find((db) => db.external_id == p.external_id)) {
-                    return p
+        if (playlist.length != dbplaylist.length) {
+            const inserts = []
+            const deletions = []
+            playlist.forEach((n) => {
+                if (!dbplaylist.find((o) => o.external_id == n.external_id)) {
+                    inserts.push(n)
                 }
-
             })
-            await prisma.playlist.createMany({
-                data: [..._]
-            })
-            let _dbplaylist = await prisma.playlist.findMany({
-                where: {
-                    userId: user.id,
-                    platform: service == 'spotify'? 'SPOTIFY':'YOUTUBE'
+            dbplaylist.forEach((n) => {
+                if (!playlist.find((o) => o.external_id == n.external_id)) {
+                    deletions.push(n)
                 }
+            })
+            deletions.forEach(async(d)=>{
+                await prisma.playlist.delete({
+                    where:{
+                        id: d.id
+                    }
+                })
+            })
+            inserts.forEach(async(d)=>{
+                await prisma.playlist.createMany({
+                    data:[...inserts]
+                })
             })
             return res.status(200).json({
-                items: _dbplaylist
+                items: playlist
             })
-            
 
         }
         return res.status(200).json({
-            items: playlist
+            items: dbplaylist
         })
     } catch (error) {
         console.log(error)

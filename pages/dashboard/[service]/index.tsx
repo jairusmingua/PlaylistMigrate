@@ -84,10 +84,12 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
                 title={
                   <>
                     <img className="p-1" src={UIImg[currentAccount.providerId]} height="30px" width="30px" />
-                    {
+                    <span className="px-2">
+                      {
 
-                      UIName[currentAccount.providerId]
-                    }
+                        UIName[currentAccount.providerId]
+                      }
+                    </span>
 
                   </>
                 }

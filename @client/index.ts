@@ -29,7 +29,9 @@ export class PMAPI {
         let params = new URLSearchParams({...p})
         let { data } = await axios.get(`${process.env.NEXT_PUBLIC_SEARCH_API_URL}/api/v1/search?${params}`)
         let result: SongAPIResult[] = await data.result
-        console.log(result)
+        if(result.length == 0){
+            throw 'No Found Song'
+        }
         return result
     }
 }

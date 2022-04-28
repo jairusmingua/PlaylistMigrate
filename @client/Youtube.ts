@@ -21,10 +21,11 @@ export class Youtube extends Service {
             if (response.data.items.length == 0) {
                 return null
             }
+            const imageSrc = response.data.items[0].snippet.thumbnails['default'].url
             return {
                 'id': response.data.items[0].id,
                 'name': response.data.items[0].snippet.title,
-                'imageSrc': response.data.items[0].snippet.thumbnails['default'].url,
+                'imageSrc': imageSrc == 'https://i.ytimg.com/img/no_thumbnail.jpg' ? null : imageSrc,
                 'privacy': response.data.items[0].status.privacyStatus
             }
         } catch (error) {
@@ -34,7 +35,7 @@ export class Youtube extends Service {
     async getPlaylistSongs(account: Account, playlistId: string | string[]): Promise<{ songs: Song[], totalSongs: number }> {
         try {
             let params = new URLSearchParams({
-                part: 'snippet',
+                part: 'snippet, status',
                 playlistId: playlistId.toString(),
                 maxResults: '50'
             })
@@ -46,15 +47,19 @@ export class Youtube extends Service {
             let songs: Song[] = []
             let items: [] = response.data.items
             items.forEach((item: any) => {
-                songs.push({
-                    id: item.snippet.resourceId.videoId,
-                    name: item.snippet.title,
-                    artists: [{
-                        name: item.snippet.videoOwnerChannelTitle.replace(' - Topic', '')
-                    }],
-                    imageSrc: item.snippet.thumbnails['default'].url
-                })
+                const name = item.snippet.videoOwnerChannelTitle
+                if (item.status.privacyStatus != 'private') {
+                    songs.push({
+                        id: item.snippet.resourceId.videoId,
+                        name: item.snippet.title,
+                        artists: [{
+                            name: name ? name.replace(' - Topic', '') : name
+                        }],
+                        imageSrc: item.snippet.thumbnails['default']?.url
+                    })
+                }
             })
+
             return {
                 songs: songs,
                 totalSongs: response.data.pageInfo.totalResults

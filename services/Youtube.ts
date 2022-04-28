@@ -61,12 +61,23 @@ export class Youtube extends Service {
         }
 
     }
-    async getPlaylists(account: Account) {
-        const params = new URLSearchParams({
+    async getPlaylists(account: Account, dbplaylist: Playlist[], playlist: Playlist[] = [], next: string = null) {
+        let _params = {
+            pageToken: next
+        }
+        let __params = {
             part: 'snippet',
             maxResults: '25',
-            mine: 'true'
-        })
+            mine: 'true',
+
+        }
+        if (next) {
+            __params = {
+                ...__params,
+                ..._params
+            }
+        }
+        const params = new URLSearchParams(__params)
         const url = `${process.env.YOUTUBE_BASE_URL}/playlists?${params}`;
         const response = await fetch(url, {
             method: 'GET',
@@ -78,9 +89,14 @@ export class Youtube extends Service {
         if (response.status == 401) {
             throw response.json()
         }
-        const data = await response.json();        
+        const data = await response.json();
+        const _next = data.nextPageToken
+        const playlistCount = data.pageInfo.totalResults - 1
+        if (dbplaylist.length == playlistCount && dbplaylist) {
+            return dbplaylist
+        }
         const items: [] = data.items
-        const playlist: Playlist[] = items.map((item: any) => {
+        const _playlist: Playlist[] = items.map((item: any) => {
             return {
                 title: item.snippet.title,
                 image: item.snippet.thumbnails['default'].url,
@@ -94,6 +110,10 @@ export class Youtube extends Service {
                 updatedAt: new Date(),
             }
         })
+        playlist.push(..._playlist)
+        if (_next) {
+            return await this.getPlaylists(account, [], playlist, _next)
+        }
         return playlist
     } catch(error) {
         console.log(error)

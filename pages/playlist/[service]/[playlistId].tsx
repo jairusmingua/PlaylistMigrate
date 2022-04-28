@@ -107,7 +107,7 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
         <title>PlaylistMigrate {playlist?.name ? `| ${playlist?.name}` : ''}</title>
       </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
-        <a className="btn-outline-light" href="/dashboard">
+        <a className="btn-outline-light" onClick={()=>{router.back()}}>
           <i className="bi bi-arrow-left"></i>
         </a>
       </div>
@@ -173,7 +173,7 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
                           song.id != null &&
                           <li key={i} style={{ listStyle: 'none', backgroundColor: 'black' }} className="playlistSongItem mb-3 p-3">
                             <div className="d-flex gap-3">
-                              <img className="mx-3" height={50} width={50} src={song.imageSrc} alt={song?.name} />
+                              <img className="mx-3" height={50} width={50} src={song?.imageSrc} alt={song?.name} />
                               <div className="d-flex flex-column">
                                 <h4>{song.name}</h4>
                                 <span>

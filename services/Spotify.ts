@@ -38,38 +38,51 @@ export class Spotify extends Service {
         }
 
     }
-    async getPlaylists(account: Account) {
-        const url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                "Authorization": `Bearer ${account.accessToken}`,
-                "Accept": "application/json",
+    async getPlaylists(account: Account, dbplaylist: Playlist[], playlist: Playlist[] = [], next: string = null) {
+        try {
+            let url = `${process.env.SPOTIFY_BASE_URL}/v1/me/playlists?offset=0&limit=50`;
+            if (next) {
+                url = next
             }
-        });
-        if (response.status == 401) {
-            throw response.json()
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${account.accessToken}`,
+                    "Accept": "application/json",
+                }
+            });
+            if (response.status == 401) {
+                throw response.json()
+            }
+            const data = await response.json();
+            const _next = data.next
+            const playlistCount = data.total
+            if (dbplaylist.length == playlistCount && dbplaylist) {
+                return dbplaylist
+            }
+            const items: [] = data.items
+            const _playlist: Playlist[] = items.map((item: any) => {
+                return {
+                    title: item.name,
+                    image: item.images[0].url,
+                    userId: account.userId,
+                    id: cuid(),
+                    description: item.description,
+                    platform: 'SPOTIFY',
+                    url: '',
+                    external_id: item.id,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }
+            })
+            playlist.push(..._playlist)
+            if (_next) {
+                return await this.getPlaylists(account, [], playlist, _next)
+            }
+            return playlist
+        } catch (error) {
+            return []
         }
-        const data = await response.json();
-        const items: [] = data.items
-        const playlist: Playlist[] = items.map((item: any) => {
-            return {
-                title: item.name,
-                image: item.images[0].url,
-                userId: account.userId,
-                id: cuid(),
-                description: item.description,
-                platform: 'SPOTIFY',
-                url: '',
-                external_id: item.id,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            }
-        })
-        return playlist
-    } catch(error) {
-        console.log(error)
-        return []
-    }
 
+    }
 }

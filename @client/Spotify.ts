@@ -93,7 +93,7 @@ export class Spotify extends Service {
                     'Content-Type': 'application/json'
                 }
             })
-            if (response.status != 200) {
+            if (response.status != 201) {
                 throw response.data
             }
             return true
