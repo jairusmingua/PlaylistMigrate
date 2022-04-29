@@ -26,7 +26,9 @@ export interface Playlist {
     id: string,
     name: string,
     imageSrc: string,
-    privacy: privacy | any
+    privacy: privacy | any,
+    description? : string,
+    platform: 'SPOTIFY' | 'YOUTUBE'
 }
 export interface ServiceConfig{
     allowsBulk: boolean

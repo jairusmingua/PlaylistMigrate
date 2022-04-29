@@ -69,7 +69,6 @@ export class Spotify extends Service {
                     id: cuid(),
                     description: item.description,
                     platform: 'SPOTIFY',
-                    url: '',
                     playlistId: null,
                     external_id: item.id,
                     createdAt: new Date(),

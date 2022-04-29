@@ -8,13 +8,14 @@ import { useRouter } from 'next/router';
 import MigrateSequence from '../../../components/MigrateSequence';
 
 import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
-import { Account, User } from '@prisma/client';
-import { Playlist, Song, UIImg, UIName } from '../../../@client/types';
+import { Account, User, Playlist } from '@prisma/client';
+import { prisma } from '../../../db/prisma'
+import { Playlist as P, Song, UIImg, UIName } from '../../../@client/types';
 import { services } from '../../../@client';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
-  const { service } = query
-  const user = await getUser({req: req})
+  const { service, playlistId } = query
+  const user = await getUser({ req: req })
   if (!user) {
     return {
       redirect: {
@@ -24,7 +25,20 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     }
   }
   const credential = getOauthAccount(user.accounts, service.toString())
-  if (!credential){
+  if (!credential) {
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/dashboard'
+      }
+    }
+  }
+  const sourcePlaylist = await prisma.playlist.findFirst({
+    where:{
+      external_id: playlistId.toString()
+    }
+  })
+  if (!sourcePlaylist) {
     return {
       redirect: {
         permanent: true,
@@ -36,7 +50,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     props: {
       user: user,
       accounts: user.accounts,
-      currentCredentials: credential
+      currentCredentials: credential,
+      sourcePlaylist: sourcePlaylist
     }
   }
 
@@ -45,14 +60,15 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
 interface PlaylistViewProps {
   user: User,
   accounts: Account[],
-  currentCredentials: Account
+  currentCredentials: Account,
+  sourcePlaylist: Playlist
 }
 
 
-export default function PlaylistView({ user, accounts, currentCredentials }: PlaylistViewProps) {
+export default function PlaylistView({ user, accounts, currentCredentials, sourcePlaylist }: PlaylistViewProps) {
   const router = useRouter()
   const { playlistId } = router.query
-  const [playlist, setPlaylist] = useState<Playlist>(null);
+  const [playlist, setPlaylist] = useState<P>(null);
   const [songs, setSongs] = useState<Song[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -107,7 +123,7 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
         <title>PlaylistMigrate {playlist?.name ? `| ${playlist?.name}` : ''}</title>
       </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
-        <a className="btn-outline-light" onClick={()=>{router.back()}}>
+        <a className="btn-outline-light" onClick={() => { router.back() }}>
           <i className="bi bi-arrow-left"></i>
         </a>
       </div>
@@ -256,6 +272,8 @@ export default function PlaylistView({ user, accounts, currentCredentials }: Pla
                 playlistName={playlist?.name}
                 playlistId={playlistId.toString()}
                 playlistThumbnail={playlist.imageSrc}
+                user={user}
+                sourcePlaylist={sourcePlaylist}
 
               />
             )

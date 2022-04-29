@@ -1,30 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Navbar, Container, Button, Spinner } from 'react-bootstrap';
-import { Account } from '@prisma/client';
+import { Account, User } from '@prisma/client';
 import axios from 'axios'
 import Head from 'next/head';
 import { PMAPI, services } from '../@client';
-import { Song, SongAPIResult } from '../@client/types';
+import { Playlist, Song, SongAPIResult } from '../@client/types';
 import { OAuthProviderType } from 'next-auth/providers';
-
+import { useRouter } from 'next/router';
+import {Playlist as P} from '@prisma/client'
+import cuid from 'cuid';
 let isContinue = true
 let mfoundSongs: SongAPIResult[] = []
 let pmapi = new PMAPI()
 interface MigrateSequenceProps {
     playlistName: string,
     playlistId: string,
+    sourcePlaylist: P,
     onStart: VoidFunction,
     onCancel: VoidFunction,
     onFinish: VoidFunction,
     sourceCredentials: Account,
     destinationCredentials: Account,
-    playlistThumbnail: string
+    playlistThumbnail: string,
+    user: User
 }
 
 function MigrateSequence({
     playlistName, playlistId, playlistThumbnail,
     onStart, onCancel, onFinish,
-    sourceCredentials, destinationCredentials
+    sourceCredentials, destinationCredentials,
+    user, sourcePlaylist
 }: MigrateSequenceProps) {
     const [currentDestinationSong, setCurrentDestinationSong] = useState<Song>(null);
     const [currentIndex, setCurrentIndex] = useState(undefined);
@@ -96,6 +101,26 @@ function MigrateSequence({
         }
 
     }
+    async function setOrigin(createdPlaylist: Playlist) {
+        let p : P = {
+            id: null,
+            userId: null,
+            title: createdPlaylist.name,
+            description: createdPlaylist.description,
+            image: createdPlaylist.imageSrc,
+            platform: createdPlaylist.platform,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            playlistId: sourcePlaylist.id,
+            external_id: createdPlaylist.id
+        }
+        const result = await axios.post(`/api/playlist/set-origin/${playlistId}`, p)
+        if(result.status == 200){
+            return true
+        }
+        return false
+    }
+
     async function startMigrate() {
         setStatusMsg('Collecting Songs from Database...')
         collectSongs().then(() => {
@@ -104,7 +129,13 @@ function MigrateSequence({
                 setStatusMsg('Inserting Items to Playlist...')
                 insertPlaylist(playlist.id).then((result) => {
                     if (result) {
-                        setIsDone(true)
+                        console.log(playlist)
+                        setOrigin(playlist).then((success)=>{
+                            if(success){
+                                setIsDone(true)
+                            }
+
+                        })
                     }
                 })
             })

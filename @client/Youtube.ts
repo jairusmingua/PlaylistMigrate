@@ -26,7 +26,9 @@ export class Youtube extends Service {
                 'id': response.data.items[0].id,
                 'name': response.data.items[0].snippet.title,
                 'imageSrc': imageSrc == 'https://i.ytimg.com/img/no_thumbnail.jpg' ? null : imageSrc,
-                'privacy': response.data.items[0].status.privacyStatus
+                'privacy': response.data.items[0].status.privacyStatus,
+                'description': response.data.items[0].snippet.description,
+                'platform': 'YOUTUBE'
             }
         } catch (error) {
             return null
@@ -98,7 +100,9 @@ export class Youtube extends Service {
                 'id': response.data.id,
                 'name': response.data.snippet.title,
                 'imageSrc': response.data.snippet.thumbnails['default'].url,
-                'privacy': response.data.status.privacyStatus
+                'privacy': response.data.status.privacyStatus,
+                'platform': 'YOUTUBE',
+                'description': response.data.snippet.description
             }
         } catch (error) {
             console.log(error)

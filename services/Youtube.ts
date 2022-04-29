@@ -104,7 +104,6 @@ export class Youtube extends Service {
                 id: cuid(),
                 description: item.snippet.description,
                 platform: 'YOUTUBE',
-                url: '',
                 playlistId: null,
                 external_id: item.id,
                 createdAt: new Date(),

@@ -19,7 +19,9 @@ export class Spotify extends Service {
                 'id': response.data.id,
                 'name': response.data.name,
                 'imageSrc': response.data.images[0].url,
-                'privacy': null
+                'privacy': null,
+                'description': response.data.description,
+                'platform': 'SPOTIFY'
             }
         } catch (error) {
             return null
@@ -72,7 +74,9 @@ export class Spotify extends Service {
                 'id': response.data.id,
                 'name': response.data.name,
                 'imageSrc': null,
-                'privacy': response.data.public == 'true' ? 'public' : 'private'
+                'privacy': response.data.public == 'true' ? 'public' : 'private',
+                'platform': 'SPOTIFY',
+                'description': response.data.description
             }
         } catch (error) {
             console.log(error)
