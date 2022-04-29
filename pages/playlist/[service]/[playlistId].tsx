@@ -10,7 +10,7 @@ import MigrateSequence from '../../../components/MigrateSequence';
 import { getOauthAccount, getUser } from '../../../repositories/UserRepository';
 import { Account, User, Playlist } from '@prisma/client';
 import { prisma } from '../../../db/prisma'
-import { Playlist as P, Song, UIImg, UIName } from '../../../@client/types';
+import { platformProviderMap, Playlist as P, Song, UIImg, UIName } from '../../../@client/types';
 import { services } from '../../../@client';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
@@ -34,8 +34,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     }
   }
   const sourcePlaylist = await prisma.playlist.findFirst({
-    where:{
+    where: {
       external_id: playlistId.toString()
+    },
+    include: {
+      Playlist: true,
+      playlistOrigin: true
     }
   })
   if (!sourcePlaylist) {
@@ -61,7 +65,7 @@ interface PlaylistViewProps {
   user: User,
   accounts: Account[],
   currentCredentials: Account,
-  sourcePlaylist: Playlist
+  sourcePlaylist: Playlist & { Playlist: Playlist, playlistOrigin: Playlist[] }
 }
 
 
@@ -76,6 +80,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
   const [doneMigrating, setDoneMigrating] = useState(false);
   const [destinationCredentials, setDestinationCredentials] = useState(null);
   const [option, setOption] = useState(null);
+
   function handleClose() {
     setShowModal(false)
     setIsMigrating(false)
@@ -123,7 +128,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
         <title>PlaylistMigrate {playlist?.name ? `| ${playlist?.name}` : ''}</title>
       </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
-        <a className="btn-outline-light" onClick={() => { router.back() }}>
+        <a className="btn-outline-light" href="/dashboard">
           <i className="bi bi-arrow-left"></i>
         </a>
       </div>
@@ -144,12 +149,49 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                     <div className="p-4">
                       <div className="d-flex flex-column align-items-center w-100 pt-5 position-relative" style={{ zIndex: 50 }}>
 
-                        <img src={playlist.imageSrc} style={{ aspectRatio: '1', height: '10vw', minHeight: '90px' }} alt="" />
+                        <img src={playlist.imageSrc} style={{ aspectRatio: '1', height: '10vw', minHeight: '90px', objectFit: 'cover' }} alt="" />
                         <h1 className="py-4 text-center">{playlist.name}</h1>
-
-                        <Button onClick={handleOpen} className="spotifyMigrateBtn" variant="dark" size="lg">
+                        <Button disabled={(sourcePlaylist.playlistOrigin.length != 0 || sourcePlaylist.Playlist)? true: false} onClick={handleOpen} className="spotifyMigrateBtn mb-4" variant="dark" size="lg">
                           Migrate
                         </Button>
+                        {
+                          sourcePlaylist.Playlist ? <>
+                            <div>
+                              <span>
+                                PlaylistMigrated from {' '}
+                              </span>
+                              <a href={`/playlist/${platformProviderMap[sourcePlaylist.Playlist.platform]}/${sourcePlaylist.Playlist.external_id}`}>
+                                <img src={UIImg[platformProviderMap[sourcePlaylist.Playlist.platform]]} alt={sourcePlaylist.Playlist.id} height={20} width={20} />
+                                <span>
+
+                                  {UIName[platformProviderMap[sourcePlaylist.Playlist.platform]]}
+                                </span>
+                              </a>
+                            </div>
+                          </> : <>
+                            {
+                              sourcePlaylist.playlistOrigin.length != 0 ? <>
+                                <div className="d-flex flex-column justify-content-center align-items-center">
+                                  <span>This Playlist is migrated to</span>
+                                  {
+                                    sourcePlaylist.playlistOrigin.map((playlist, i) =>
+                                      <a href={`/playlist/${platformProviderMap[playlist.platform]}/${playlist.external_id}`} key={i} className="d-flex gap-3 align-items-center">
+                                        <img src={UIImg[platformProviderMap[playlist.platform]]} alt={playlist.title} height={20} width={20} />
+                                        <span>
+
+                                          {UIName[platformProviderMap[playlist.platform]]}
+                                        </span>
+                                      </a>
+                                    )
+                                  }
+                                </div>
+                              </> : <>
+
+                              </>
+                            }
+                          </>
+                        }
+                        <span></span>
                       </div>
                       <img src={playlist?.imageSrc} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
 

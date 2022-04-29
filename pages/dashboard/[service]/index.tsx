@@ -125,7 +125,7 @@ export default function Dashboard({ user }: { user: User & { accounts: Account[]
             </>
           ) : (
             <div className="container-fluid m-0 px-0 pt-0 grid" style={{ paddingBottom: "200px" }}>
-              {playlist.map((item: Playlist, i) =>
+              {playlist.map((item: Playlist & {Playlist: Playlist, playlistOrigin: Playlist[]}, i) =>
                 <PlaylistItem account={currentAccount} key={i} item={item}></PlaylistItem>
               )}
             </div>

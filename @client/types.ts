@@ -60,3 +60,8 @@ export const UIImg = {
     'spotify': '/spotify.png',
     'google': '/youtube.png'
 }
+
+export const platformProviderMap = {
+    'SPOTIFY': 'spotify',
+    'YOUTUBE': 'google'
+}

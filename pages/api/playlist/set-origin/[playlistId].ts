@@ -16,7 +16,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         playlist.id = cuid()
         playlist.userId = user.id
         playlist.playlistId = playlistId.toString()
-        console.log(playlist)
 
         const dbplaylist = await prisma.playlist.create({
             data: {

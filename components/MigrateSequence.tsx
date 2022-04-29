@@ -42,13 +42,16 @@ function MigrateSequence({
     const [_isContinue, setIsContinue] = useState(true);
     const [isDone, setIsDone] = useState(false);
 
-    async function insertPlaylist(playlistId) {
+    async function insertPlaylist(playlist) {
         try {
+            if(!playlist){
+                return false
+            }
             if (!isContinue) {
                 return false;
             }
             const service = services[destinationCredentials.providerId]
-            return await service.insertItemsToPlaylist(destinationCredentials, playlistId, mfoundSongs, 'private', 0)
+            return await service.insertItemsToPlaylist(destinationCredentials, playlist.id, mfoundSongs, 'private', 0)
         } catch (error) {
             console.log(error);
             return false
@@ -102,6 +105,9 @@ function MigrateSequence({
 
     }
     async function setOrigin(createdPlaylist: Playlist) {
+        if(!createPlaylist){
+            return false
+        }
         let p : P = {
             id: null,
             userId: null,
@@ -127,7 +133,7 @@ function MigrateSequence({
             setStatusMsg('Creating Playlist...')
             createPlaylist().then((playlist) => {
                 setStatusMsg('Inserting Items to Playlist...')
-                insertPlaylist(playlist.id).then((result) => {
+                insertPlaylist(playlist).then((result) => {
                     if (result) {
                         console.log(playlist)
                         setOrigin(playlist).then((success)=>{

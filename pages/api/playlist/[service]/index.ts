@@ -18,6 +18,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             where: {
                 userId: user.id,
                 platform: service == 'spotify' ? 'SPOTIFY' : 'YOUTUBE'
+            },
+            include:{
+                playlistOrigin: true,
+                Playlist: true
             }
         })
 
@@ -44,21 +48,56 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                     deletions.push(n)
                 }
             })
-            deletions.forEach(async(d)=>{
-                await prisma.playlist.delete({
-                    where:{
+            deletions.forEach(async (d) => {
+                const deleted = await prisma.playlist.delete({
+                    where: {
                         id: d.id
+                    },
+                    select: {
+                        playlistOrigin: true,
+                        Playlist: true
                     }
                 })
+                if (deleted && deleted.playlistOrigin.length != 0) {
+                    const newOriginPlaylist = deleted.playlistOrigin[0]
+                    for (let i = 0; i < deleted.playlistOrigin.length; i++) {
+                        if (i == 0) {
+                            await prisma.playlist.update({
+                                where: {
+                                    id: deleted.playlistOrigin[i].id
+                                },
+                                data: {
+                                    playlistId: null
+                                }
+                            })
+                        } else {
+                            await prisma.playlist.update({
+                                where: {
+                                    id: deleted.playlistOrigin[i].id
+                                },
+                                data: {
+                                    playlistId: newOriginPlaylist.id
+                                }
+                            })
+
+                        }
+                    }
+                }
             })
-            inserts.forEach(async(d)=>{
+            inserts.forEach(async (d) => {
                 await prisma.playlist.createMany({
-                    data:[...inserts],
+                    data: [...inserts],
                     skipDuplicates: true
                 })
             })
+            const p = await prisma.playlist.findMany({
+                where: {
+                    userId: user.id,
+                    platform: service == 'spotify' ? 'SPOTIFY' : 'YOUTUBE'
+                }
+            })
             return res.status(200).json({
-                items: playlist
+                items: p
             })
 
         }
