@@ -24,7 +24,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const playlist: Playlist[] = await services[service.toString()].getPlaylists(credentials, dbplaylist)
         if (dbplaylist.length == 0) {
             await prisma.playlist.createMany({
-                data: [...playlist]
+                data: [...playlist],
+                skipDuplicates: true
             })
             return res.status(200).json({
                 items: playlist
@@ -52,7 +53,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             })
             inserts.forEach(async(d)=>{
                 await prisma.playlist.createMany({
-                    data:[...inserts]
+                    data:[...inserts],
+                    skipDuplicates: true
                 })
             })
             return res.status(200).json({
