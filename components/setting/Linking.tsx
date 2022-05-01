@@ -82,7 +82,7 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                                 {
                                     !_accounts.filter((val) => val.providerId == 'spotify')[0].primary ?
                                         <div className="d-flex">
-                                            <button className="btn btn-link" onClick={() => handleUnlinkAccount('spotify')}>Unlink</button>
+                                            {/* <button className="btn btn-link" onClick={() => handleUnlinkAccount('spotify')}>Unlink</button> */}
                                             <button className="btn btn-link" onClick={() => handlePrimary('spotify')} >Set As Primary</button>
                                         </div> :
                                         <button className="btn btn-link" disabled>Primary</button>
@@ -121,7 +121,7 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                                 {
                                     !_accounts.filter((val) => val.providerId == 'google')[0].primary ?
                                         <div className="d-flex">
-                                            <button className="btn btn-link" onClick={() => handleUnlinkAccount('google')}>Unlink</button>
+                                            {/* <button className="btn btn-link" onClick={() => handleUnlinkAccount('google')}>Unlink</button> */}
                                             <button className="btn btn-link" onClick={() => handlePrimary('google')} >Set As Primary</button>
                                         </div> :
                                         <button className="btn btn-link" disabled>Primary</button>
