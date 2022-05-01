@@ -4,6 +4,7 @@ import { getSession, providers, signIn, signOut, useSession } from 'next-auth/cl
 import axios from "axios";
 import { generateCallback } from "../../util";
 import { useRouter } from "next/router";
+import { supportedProviders, UIImg, UIName } from "../../@client/types";
 
 interface LinkingProps {
     accounts: Array<Account>;
@@ -18,7 +19,7 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                 callbackUrl: generateCallback(
                     '/settings',
                     'SUCCESS',
-                    `${provider == 'spotify'?'Spotify':'Youtube Music'} was Successfully Linked`,
+                    `${provider == 'spotify' ? 'Spotify' : 'Youtube Music'} was Successfully Linked`,
                     null
                 ),
             })
@@ -31,7 +32,7 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                 set_accounts(response.data)
             }
         }).catch((error) => {
-            const url = generateCallback('/settings','ERROR', error.response.data.error)
+            const url = generateCallback('/settings', 'ERROR', error.response.data.error)
             router.push(url)
         })
     }
@@ -52,86 +53,50 @@ const Linking: FunctionComponent<LinkingProps> = ({ accounts }) => {
                     <p>In order to use PlaylistMigrate, link two or more accounts.</p>
                 </div>
                 <div className="row">
-                    <div className="col py-2 text-center">
-                        <button className="btn btn-dark" onClick={() => handleSignin('spotify', _accounts.filter(val => val.providerId == 'spotify')[0])}>
-                            <div className="d-flex justify-content-between">
+                    {
+                        supportedProviders.map((providerId, i) => 
+                            <div key={i} className="col py-2 text-center">
+                                <button className="btn btn-dark" onClick={() => handleSignin(providerId, _accounts.find(val => val.providerId == providerId))}>
+                                    <div className="d-flex justify-content-between">
 
-                                <div className="d-flex justify-content-start align-items-center">
+                                        <div className="d-flex justify-content-start align-items-center">
 
-                                    <img src="/spotify.png" alt="spotify" height={30} />
-                                    <span className="px-2">
+                                            <img src={UIImg[providerId]} alt={providerId} height={30} />
+                                            <span className="px-2">
+                                                {
+                                                    _accounts.filter((val) => val.providerId == providerId)
+                                                        .length == 0 ? `Link to ${UIName[providerId]} `: `${UIName[providerId]} Linked`
+
+                                                }
+                                            </span>
+                                        </div>
                                         {
-                                            _accounts.filter((val) => val.providerId == 'spotify')
-                                                .length == 0 ? 'Link to Spotify' : 'Spotify Linked'
+                                            _accounts.filter((val) => val.providerId == providerId)
+                                                .length == 0 ? <i className="bi bi-check" style={{ opacity: '0' }}></i> : <i className="bi bi-check"></i>
 
                                         }
-                                    </span>
-                                </div>
+                                    </div>
+                                </button>
+
                                 {
-                                    _accounts.filter((val) => val.providerId == 'spotify')
-                                        .length == 0 ? <i className="bi bi-check" style={{ opacity: '0' }}></i> : <i className="bi bi-check"></i>
+                                    (_accounts.filter((val) => val.providerId == providerId)
+                                        .length != 0 && _accounts.length > 1) &&
+                                    <>
+                                        {
+                                            !_accounts.filter((val) => val.providerId == providerId)[0].primary ?
+                                                <div className="d-flex">
+                                                    {/* <button className="btn btn-link" onClick={() => handleUnlinkAccount(providerId)}>Unlink</button> */}
+                                                    <button className="btn btn-link" onClick={() => handlePrimary(providerId)} >Set As Primary</button>
+                                                </div> :
+                                                <button className="btn btn-link" disabled>Primary</button>
+
+                                        }
+                                    </>
 
                                 }
                             </div>
-                        </button>
-
-                        {
-                            (_accounts.filter((val) => val.providerId == 'spotify')
-                                .length != 0 && _accounts.length > 1) &&
-                            <>
-                                {
-                                    !_accounts.filter((val) => val.providerId == 'spotify')[0].primary ?
-                                        <div className="d-flex">
-                                            {/* <button className="btn btn-link" onClick={() => handleUnlinkAccount('spotify')}>Unlink</button> */}
-                                            <button className="btn btn-link" onClick={() => handlePrimary('spotify')} >Set As Primary</button>
-                                        </div> :
-                                        <button className="btn btn-link" disabled>Primary</button>
-
-                                }
-                            </>
-
-                        }
-
-                    </div>
-                    <div className="col py-2 text-center">
-                        <button className="btn btn-dark" onClick={() => handleSignin('google', _accounts.filter(val => val.providerId == 'google')[0])}>
-                            <div className="d-flex justify-content-between p-0 m-0">
-                                <div className="d-flex justify-content-start align-items-center">
-
-                                    <img src="/youtube.png" alt="google" height={30} />
-                                    <span className="px-2">
-                                        {
-                                            _accounts.filter((val) => val.providerId == 'google')
-                                                .length == 0 ? 'Link to Youtube Music' : 'Youtube Music Linked'
-
-                                        }
-                                    </span>
-                                </div>
-                                {
-                                    _accounts.filter((val) => val.providerId == 'google')
-                                        .length == 0 ? <i className="bi bi-check" style={{ opacity: '0' }}></i> : <i className="bi bi-check"></i>
-
-                                }
-                            </div>
-                        </button>
-                        {
-                            (_accounts.filter((val) => val.providerId == 'google')
-                                .length != 0 && _accounts.length > 1) &&
-                            <>
-                                {
-                                    !_accounts.filter((val) => val.providerId == 'google')[0].primary ?
-                                        <div className="d-flex">
-                                            {/* <button className="btn btn-link" onClick={() => handleUnlinkAccount('google')}>Unlink</button> */}
-                                            <button className="btn btn-link" onClick={() => handlePrimary('google')} >Set As Primary</button>
-                                        </div> :
-                                        <button className="btn btn-link" disabled>Primary</button>
-
-
-                                }
-                            </>
-
-                        }
-                    </div>
+                        )
+                    }
                 </div>
             </div>
         </>

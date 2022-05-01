@@ -47,4 +47,10 @@ export abstract class Service {
     constructor() { }
     abstract refreshToken(account: Account): Promise<Account>
     abstract getPlaylists(account: Account, dbplaylist: P[], playlist?: P[], next?: string | null)
+    abstract getPlaylist(account: Account, playlistId: string | string[]): Promise<P>
+}
+
+export const providerPlatformMap = {
+    'spotify': 'SPOTIFY',
+    'google': 'YOUTUBE'
 }

@@ -54,14 +54,23 @@ export const apiMap = {
 
 export const UIName = {
     'spotify': 'Spotify',
-    'google': 'Youtube Music'
+    'google': 'Youtube Music',
+    'apple' : 'Apple Music',
+    'deezer': 'Deezer'
 }
 export const UIImg = {
     'spotify': '/spotify.png',
-    'google': '/youtube.png'
+    'google': '/youtube.png',
+    'apple' : '/apple.png',
+    'deezer': '/deezer.png'
 }
 
 export const platformProviderMap = {
     'SPOTIFY': 'spotify',
     'YOUTUBE': 'google'
 }
+
+export const supportedProviders = [
+    'spotify',
+    'google'
+]

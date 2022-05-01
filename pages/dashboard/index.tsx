@@ -1,5 +1,5 @@
 import { signOut, useSession, getSession } from 'next-auth/client'
-import { InferGetServerSidePropsType, NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -18,6 +18,7 @@ import { getUser } from '../../repositories/UserRepository'
 import Linking from '../../components/setting/Linking'
 import { getPrimaryAccount } from '../../util'
 import { getOauthAccount } from '../../@client'
+import { UIImg, UIName } from '../../@client/types'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const user = await getUser({ req: req })
@@ -45,14 +46,111 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       }
     }
   }
-  let primaryAccount = getPrimaryAccount(user.accounts)
-  return {
-    redirect: {
-      permanent: true,
-      destination: `/dashboard/${primaryAccount.providerId}`
-    },
-    props:{}
-  }
+  return { props: { user: user } }
 };
-export default function Dashboard({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+
+export default function Dashboard({ user }: { user: User & { accounts: Account[] } }) {
+  const router = useRouter()
+  const { service } = router.query
+  let accounts = user.accounts
+  let currentAccount = service ? getOauthAccount(accounts, service.toString()) : {
+    providerId : 'All'
+  }
+  const [playlist, setPlaylist] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    let url = currentAccount.providerId != 'All' ? `/api/playlist/${currentAccount.providerId}` : `/api/playlist`
+    axios.get(url).then((res) => {
+      setPlaylist(res.data.items)
+      setLoading(false)
+    }).catch((error) => {
+      console.log(error.response)
+    })
+  }, []);
+
+  return (
+    <>
+      <Head>
+        <title>PlaylistMigrate | Dashboard</title>
+      </Head>
+      {user ? (
+
+        <div className="container">
+          <PageNavigation user={user}></PageNavigation>
+          <div className="row px-3 pb-5">
+            <div className="d-flex">
+
+              <DropdownButton
+                title={
+                  <>
+                    {
+                      currentAccount.providerId != 'All' &&
+                      <img src={UIImg[currentAccount.providerId]} className="p-1" height="30px" width="30px" />
+                    }
+                    <span className="px-2">
+                      {
+
+                        currentAccount.providerId != 'All' ? UIName[currentAccount.providerId] : 'All Playlists'
+                      }
+                    </span>
+
+                  </>
+                }
+                variant="secondary"
+                id="input-group-dropdown-1"
+                menuAlign="left"
+              >
+                <Dropdown.Item key={'all'} href={`/dashboard`} active={currentAccount.providerId == 'All' ? true : false}>{'All Playlists'}</Dropdown.Item>
+                {
+                  accounts.filter((account) => account.primary == true).map((account, i) =>
+                    <>
+                      <Dropdown.Item key={account.providerId} href={`/dashboard?service=${account.providerId}`} active={account.providerId == currentAccount.providerId}>{UIName[account.providerId]}</Dropdown.Item>
+                    </>)
+
+                }
+                {
+                  accounts.filter((account) => account.primary != true).map((account, i) =>
+                    <>
+                      <Dropdown.Item key={account.providerId} href={`/dashboard?service=${account.providerId}`} active={account.providerId == currentAccount.providerId}>{UIName[account.providerId]}</Dropdown.Item>
+                    </>
+                  )
+                }
+              </DropdownButton>
+
+
+            </div>
+          </div>
+          {loading ? (
+            <>
+              <div className="d-flex justify-content-center align-items-center loading">
+                <Spinner animation="border" role="status">
+                </Spinner>
+              </div>
+            </>
+          ) : (
+            <div className="container-fluid m-0 px-0 pt-0 grid" style={{ paddingBottom: "200px" }}>
+              {playlist.map((item: Playlist & { Playlist: Playlist, playlistOrigin: Playlist[] }, i) =>
+                <PlaylistItem key={i} item={item}></PlaylistItem>
+              )}
+            </div>
+          )}
+
+        </div>
+
+
+      ) : (<></>)}
+      <style jsx>
+        {
+          `.grid{
+          display: grid;
+          gap: 1rem;
+          grid-template-columns: repeat(auto-fill, minmax(157px, 1fr));
+        }`
+        }
+      </style>
+    </>
+  )
 }
+Dashboard.requireAuth = true

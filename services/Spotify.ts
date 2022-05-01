@@ -1,5 +1,5 @@
 import { Credentials, AuthType, OAuthType, Song, Service, Profile } from './types';
-import { Account, Playlist, User } from '@prisma/client';
+import { Account, Platform, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
@@ -84,5 +84,35 @@ export class Spotify extends Service {
             return []
         }
 
+    }
+    async getPlaylist(account: Account, playlistId: string | string []){
+        try {
+            let url = `${process.env.SPOTIFY_BASE_URL}/v1/playlists/${playlistId}`
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${account.accessToken}`,
+                    "Accept": "application/json",
+                }
+            });
+            if (response.status != 200) {
+                throw response.json()
+            }
+            let data = await response.json()
+            return {
+                title: data.name,
+                image: data.images[0].url,
+                userId: '',
+                id: cuid(),
+                description: data.description,
+                platform: Platform.SPOTIFY,
+                playlistId: null,
+                external_id: data.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+        } catch (error) {
+            return null
+        }
     }
 }

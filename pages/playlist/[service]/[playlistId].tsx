@@ -12,6 +12,7 @@ import { Account, User, Playlist } from '@prisma/client';
 import { prisma } from '../../../db/prisma'
 import { platformProviderMap, Playlist as P, Song, UIImg, UIName } from '../../../@client/types';
 import { services } from '../../../@client';
+import { services as backendservice } from '../../../services'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
   const { service, playlistId } = query
@@ -33,7 +34,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
       }
     }
   }
-  const sourcePlaylist = await prisma.playlist.findFirst({
+  let sourcePlaylist = await prisma.playlist.findFirst({
     where: {
       external_id: playlistId.toString()
     },
@@ -49,6 +50,32 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
         destination: '/dashboard'
       }
     }
+  }
+  const playlistApi = await backendservice[credential.providerId].getPlaylist(credential, playlistId)
+  console.log(playlistApi)
+  if (!playlistApi) {
+    return {
+      redirect: {
+        permanent: true,
+        destination: '/dashboard'
+      }
+    }
+  }
+  if (sourcePlaylist.image != playlistApi.image) {
+    const date = sourcePlaylist.updatedAt
+    sourcePlaylist = await prisma.playlist.update({
+      where:{
+        external_id: sourcePlaylist.external_id
+      },
+      data:{
+        image: playlistApi.image,
+        updatedAt: date
+      },
+      include:{
+        Playlist: true,
+        playlistOrigin: true
+      },
+    })
   }
   return {
     props: {
@@ -72,7 +99,6 @@ interface PlaylistViewProps {
 export default function PlaylistView({ user, accounts, currentCredentials, sourcePlaylist }: PlaylistViewProps) {
   const router = useRouter()
   const { playlistId } = router.query
-  const [playlist, setPlaylist] = useState<P>(null);
   const [songs, setSongs] = useState<Song[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -112,11 +138,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
       services[currentCredentials.providerId].getPlaylistSongs(currentCredentials, playlistId)
         .then(({ songs, totalSongs }) => {
           setSongs(songs)
-          services[currentCredentials.providerId].getPlaylist(currentCredentials, playlistId)
-            .then((playlist) => {
-              setPlaylist(playlist)
-              setLoading(false)
-            })
+          setLoading(false)
         }).catch((err) => {
           console.log(err)
         })
@@ -125,10 +147,10 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
   return (
     <>
       <Head>
-        <title>PlaylistMigrate {playlist?.name ? `| ${playlist?.name}` : ''}</title>
+        <title>PlaylistMigrate {sourcePlaylist?.title ? `| ${sourcePlaylist?.title}` : ''}</title>
       </Head>
       <div className="position-absolute d-flex justify-content-between container-fluid pt-5 px-5" style={{ top: 0, left: 0, right: 0, zIndex: 60 }}>
-        <a className="btn-outline-light" href="/dashboard">
+        <a className="btn-outline-light" href={`/dashboard?service=${platformProviderMap[sourcePlaylist.platform]}`}>
           <i className="bi bi-arrow-left"></i>
         </a>
       </div>
@@ -149,9 +171,9 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                     <div className="p-4">
                       <div className="d-flex flex-column align-items-center w-100 pt-5 position-relative" style={{ zIndex: 50 }}>
 
-                        <img src={playlist.imageSrc} style={{ aspectRatio: '1', height: '10vw', minHeight: '90px', objectFit: 'cover' }} alt="" />
-                        <h1 className="py-4 text-center">{playlist.name}</h1>
-                        <Button disabled={(sourcePlaylist.playlistOrigin.length != 0 || sourcePlaylist.Playlist)? true: false} onClick={handleOpen} className="spotifyMigrateBtn mb-4" variant="dark" size="lg">
+                        <img src={sourcePlaylist.image} style={{ aspectRatio: '1', height: '10vw', minHeight: '90px', objectFit: 'cover' }} alt="" />
+                        <h1 className="py-4 text-center">{sourcePlaylist.title}</h1>
+                        <Button disabled={(sourcePlaylist.playlistOrigin.length != 0 || sourcePlaylist.Playlist) ? true : false} onClick={handleOpen} className="spotifyMigrateBtn mb-4" variant="dark" size="lg">
                           Migrate
                         </Button>
                         {
@@ -193,7 +215,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                         }
                         <span></span>
                       </div>
-                      <img src={playlist?.imageSrc} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
+                      <img src={sourcePlaylist?.image} className="position-absolute" style={{ top: 0, left: 0, width: '100%', height: '100%', filter: 'blur(50px)', opacity: '0.5', zIndex: 0 }} alt="" />
 
                     </div>
 
@@ -205,7 +227,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                           song.id != null &&
                           <li key={i} style={{ listStyle: 'none', backgroundColor: 'black' }} className="playlistSongItem mb-3 p-3">
                             <div className="d-flex gap-3">
-                              <img className="mx-3" height={50} width={50} src={song?.imageSrc} alt={song?.name} />
+                              <img className="mx-3" height={50} width={50} src={song?.imageSrc} alt={song?.name} style={{objectFit:'cover'}} />
                               <div className="d-flex flex-column">
                                 <h4>{song.name}</h4>
                                 <span>
@@ -231,7 +253,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                           song.id != null &&
                           <li key={i} style={{ listStyle: 'none', backgroundColor: 'black' }} className="playlistSongItem mb-3 p-3">
                             <div className="d-flex gap-3">
-                              <img className="mx-3" height={50} width={50} src={song?.imageSrc} alt={song?.name} />
+                              <img className="mx-3" height={50} width={50} src={song?.imageSrc} alt={song?.name} style={{objectFit:'cover'}} />
                               <div className="d-flex flex-column">
                                 <h4>{song.name}</h4>
                                 <span>
@@ -264,7 +286,7 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                       </Modal.Footer>
                     </> : <>
                       <Modal.Header closeButton>
-                        <Modal.Title>Migrate {playlist.name}</Modal.Title>
+                        <Modal.Title>Migrate {sourcePlaylist.title}</Modal.Title>
                       </Modal.Header>
 
                       <Modal.Body>
@@ -311,9 +333,9 @@ export default function PlaylistView({ user, accounts, currentCredentials, sourc
                 onCancel={handleStopMigration}
                 onFinish={handleFinishMigration}
                 onStart={() => console.log('starting')}
-                playlistName={playlist?.name}
+                playlistName={sourcePlaylist?.title}
                 playlistId={playlistId.toString()}
-                playlistThumbnail={playlist.imageSrc}
+                playlistThumbnail={sourcePlaylist.image}
                 user={user}
                 sourcePlaylist={sourcePlaylist}
 

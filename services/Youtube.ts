@@ -1,5 +1,5 @@
 import { Credentials, AuthType, OAuthType, Song, Service, Profile, Playlist as P } from './types';
-import { Account, Playlist, User } from '@prisma/client';
+import { Account, Platform, Playlist, User } from '@prisma/client';
 import { prisma } from '../db/prisma';
 import cuid from 'cuid'
 import 'dotenv/config'
@@ -118,5 +118,46 @@ export class Youtube extends Service {
     } catch(error) {
         console.log(error)
         return []
+    }
+    async getPlaylist(account: Account, playlistId: string | string []){
+        try {
+            let params = new URLSearchParams({
+                part: 'snippet,status',
+                id: playlistId.toString()
+            })
+            let url = `${process.env.YOUTUBE_BASE_URL}/playlists?${params}`
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${account.accessToken}`,
+                    "Accept": "application/json",
+                }
+            });
+            if (response.status != 200) {
+                throw await response.json()
+            }
+
+            let data = await response.json()
+            if(data.items.length == 0){
+                return null
+            }
+            const imageSrc = data.items[0].snippet.thumbnails['standard']?.url
+
+            return {
+                title: data.items[0].snippet.title,
+                image:  imageSrc,
+                userId: '',
+                id: cuid(),
+                description: data.description,
+                platform: Platform.YOUTUBE,
+                playlistId: null,
+                external_id: data.items[0].id,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            }
+        } catch (error) {
+            console.log(error)
+            return null
+        }
     }
 }
