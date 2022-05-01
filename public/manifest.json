@@ -1,7 +1,7 @@
 {
     "theme_color": "#131A13",
-    "background_color": "green",
-    "display": "fullscreen",
+    "background_color": "#131A13",
+    "display": "standalone",
     "scope": "/",
     "start_url": "/",
     "name": "PlaylistMigrate",

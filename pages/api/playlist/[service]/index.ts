@@ -22,6 +22,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             include:{
                 playlistOrigin: true,
                 Playlist: true
+            },
+            orderBy:{
+                createdAt: 'desc'
             }
         })
 
@@ -94,6 +97,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                 where: {
                     userId: user.id,
                     platform: service == 'spotify' ? 'SPOTIFY' : 'YOUTUBE'
+                },
+                orderBy:{
+                    createdAt: 'desc'
                 }
             })
             return res.status(200).json({
