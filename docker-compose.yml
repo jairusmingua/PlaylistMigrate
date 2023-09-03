@@ -1,0 +1,17 @@
+services:
+  pmsearchapi:
+    build: ./pmsearchapi
+    restart: always
+    container_name: pmsearchapi
+    env_file:
+      - ./.env.pmsearchapi
+    ports:
+      - 8044:8000
+  playlistmigrate:
+    build: .
+    restart: always
+    container_name: playlistmigrate
+    env_file:
+      - ./.env
+    ports:
+      - 8004:8000

@@ -1,0 +1,3 @@
+[submodule "pmsearchapi"]
+	path = pmsearchapi
+	url = git@github.com:jairusmingua/pmsearchapi.git
